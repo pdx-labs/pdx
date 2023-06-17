@@ -1,0 +1,34 @@
+%YAML 1.2
+---
+name: advanced_agent_demo
+comment: An agent to test advanced templating with yaml config
+model:
+    id: gpt-3.5-turbo
+prompt:
+    - system: 0_system.jinja
+    - user: 1_user.jinja
+    - when: condition_1
+      prompt:
+          - assistant: 1_assistant.jinja
+          - user: 2_user.jinja
+          - assistant: 2_assistant.jinja
+          - user: 3_user.jinja
+          - when: condition_2
+            prompt:
+                - assistant: 3_assistant.jinja
+                - user: 4_user.jinja
+    - loop: loop_1
+      prompt:
+          - assistant: 4_assistant.jinja
+          - user: 5_user.jinja
+    - switch: switch_1
+      prompt:
+          case_value_1:
+              - assistant: 5_assistant.jinja
+              - user: 6_user.jinja
+          case_value_2:
+              - assistant: 6_assistant.jinja
+              - user: 7_user.jinja
+          default:
+              - assistant: 7_assistant.jinja
+              - user: 8_user.jinja

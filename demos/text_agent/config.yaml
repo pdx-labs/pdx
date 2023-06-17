@@ -1,0 +1,10 @@
+%YAML 1.2
+---
+name: text_agent_demo
+comment: An agent to test text completions
+model:
+    # id: text-davinci-003
+    # id: gpt-3.5-turbo
+    id: claude-v1
+prompt:
+    - template: 1_prompt.jinja

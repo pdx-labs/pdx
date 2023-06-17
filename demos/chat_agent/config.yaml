@@ -1,0 +1,13 @@
+%YAML 1.2
+---
+name: chat_agent_demo
+comment: An agent to test chat completions
+model:
+    # id: text-davinci-003
+    # id: gpt-3.5-turbo
+    id: claude-v1
+prompt:
+    - system: 0_system.jinja
+    - user: 1_user.jinja
+    - assistant: 1_assistant.jinja
+    - user: 2_user.jinja

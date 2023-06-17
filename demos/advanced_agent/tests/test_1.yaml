@@ -1,0 +1,47 @@
+%YAML 1.2
+---
+0_system: null
+1_user:
+  variable_1: value_1_1
+  variable_2: value_2_1
+condition_1:
+  1_assistant:
+    variable_1: value_1_1
+    variable_2: value_2_1
+  2_user:
+    variable_1: value_1_2
+    variable_2: value_2_2
+  2_assistant:
+    variable_1: value_1_2
+    variable_2: value_2_2
+  3_user:
+    variable_1: value_1_3
+    variable_2: value_2_3
+  condition_2:    
+    3_assistant:
+      variable_1: value_1_3
+      variable_2: value_2_3
+    4_user:
+      variable_1: value_1_4
+      variable_2: value_2_4
+loop_1:
+  - 4_assistant:
+      variable_1: value_1_4_0
+      variable_2: value_2_4_0
+    5_user:
+      variable_1: value_1_5_0
+      variable_2: value_2_5_0
+  - 4_assistant:
+      variable_1: value_1_4_1
+      variable_2: value_2_4_1
+    5_user:
+      variable_1: value_1_5_1
+      variable_2: value_2_5_1
+switch_1:
+  case_value_3:
+    6_assistant:
+      variable_1: value_1_5
+      variable_2: value_2
+    7_user:
+      variable_1: value_1_6
+      variable_2: value_2_6
