@@ -11,13 +11,13 @@ Request = Union[str, int, float, Dict, List]
 
 
 class AgentBuilder:
-    def __init__(self, folder_path: str, api_keys: Keys = None):
-        self._folder_path = folder_path
+    def __init__(self, path: str, api_keys: Keys = None):
+        self._folder_path = path
         if api_keys is None:
             self._api_keys = Keys()
         else:
             self._api_keys = api_keys
-        self._config: AgentConfig = AgentConfig(folder_path)
+        self._config: AgentConfig = AgentConfig(path)
         self.prompt_tree: PromptTree = PromptTree(self._config.prompt_config)
         self._completion_agent = CompletionAgent(
             self._config.model_config, self._api_keys)

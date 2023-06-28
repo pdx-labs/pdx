@@ -1,0 +1,6 @@
+# PDX TEST CASE
+---
+1_prompt:
+    topic: "The benefits of walking"
+    summary: "Walking is good for your health. It helps you to stay fit."
+    question: "What are the benefits of walking?"
