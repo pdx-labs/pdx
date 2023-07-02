@@ -1,7 +1,7 @@
 from pdx.models import CompletionModel, ModelConfig
 from pdx.settings import Keys
 from pdx.agent.prompt_session import PromptSession
-from pdx.agent.metadata import AgentID, AgentRequest
+from pdx.agent.metadata import AgentID, RequestMetadata, AgentResponse, AgentResponseMetadata
 from pdx.logger import logger
 from uuid import uuid4
 
@@ -17,38 +17,54 @@ class CompletionAgent(object):
         self._model = CompletionModel(_api_key, model=model.id)
         self._retries = 2
 
-    def execute(self, prompt: PromptSession, agent_id: AgentID = None) -> AgentRequest:
+    def execute(self, prompt: PromptSession, request_values: dict, agent_id: AgentID = None) -> AgentResponse:
         try_count = 0
         while (try_count <= self._retries):
             try:
                 _r = self._model.run(prompt)
-                agent_request = AgentRequest(
+                request_metadata = RequestMetadata(
                     agent_id=agent_id,
                     request_id=uuid4(),
+                    request_values=request_values,
                     request_params=_r.request_params,
-                    prompt=prompt.session,
+                    prompt=prompt.session
+                )
+                metadata = AgentResponseMetadata(
+                    request=request_metadata,
+                    response=_r.metadata
+                )
+                agent_response = AgentResponse(
                     completion=_r.completion,
-                    metadata=_r.metadata)
-                return agent_request
+                    metadata=metadata
+                )
+                return agent_response
             except Exception as e:
                 logger.debug(f"Completion model failed to run: {e}")
                 try_count += 1
 
         raise ValueError("Completions model failed to run successfully.")
 
-    async def aexecute(self, prompt: PromptSession, agent_id: AgentID = None) -> AgentRequest:
+    async def aexecute(self, prompt: PromptSession, request_values: dict, agent_id: AgentID = None) -> AgentResponse:
         try_count = 0
         while (try_count <= self._retries):
             try:
                 _r = await self._model.arun(prompt)
-                agent_request = AgentRequest(
+                request_metadata = RequestMetadata(
                     agent_id=agent_id,
                     request_id=uuid4(),
+                    request_values=request_values,
                     request_params=_r.request_params,
-                    prompt=prompt.session,
+                    prompt=prompt.session
+                )
+                metadata = AgentResponseMetadata(
+                    request=request_metadata,
+                    response=_r.metadata
+                )
+                agent_response = AgentResponse(
                     completion=_r.completion,
-                    metadata=_r.metadata)
-                return agent_request
+                    metadata=metadata
+                )
+                return agent_response
             except Exception as e:
                 logger.debug(f"Completion model failed to run: {e}")
                 try_count += 1

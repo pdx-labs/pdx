@@ -4,7 +4,7 @@ from pdx.settings import Keys
 from pdx.agent.completer import CompletionAgent
 from pdx.agent.prompt import PromptTree, PromptSession
 from pdx.agent.config import AgentConfig
-from pdx.agent.metadata import AgentID
+from pdx.agent.metadata import AgentID, AgentResponse
 from dataclasses import asdict
 
 Request = Union[str, int, float, Dict, List]
@@ -24,16 +24,16 @@ class AgentBuilder:
 
         self._agent_id = AgentID(agent_name=self._config.name)
 
-    async def aexecute(self, request: dict, agent_response: bool = False):
+    async def aexecute(self, request: dict, metadata: dict = None) -> AgentResponse:
         _prompt = PromptSession(self._config.prompt_config.prompt_type)
         self.prompt_tree.execute(request, _prompt)
-        response = await self._completion_agent.aexecute(_prompt, self._agent_id)
-        logger.debug(asdict(response))
-        return response.completion
+        _response = await self._completion_agent.aexecute(_prompt, request, self._agent_id)
+        _response.metadata.add_custom(metadata=metadata)
+        return _response
 
-    def execute(self, request: dict, agent_response: bool = False):
+    def execute(self, request: dict, metadata: dict = None) -> AgentResponse:
         _prompt = PromptSession(self._config.prompt_config.prompt_type)
         self.prompt_tree.execute(request, _prompt)
-        response = self._completion_agent.execute(_prompt, self._agent_id)
-        logger.debug(asdict(response))
-        return response.completion
+        _response = self._completion_agent.execute(_prompt, request, self._agent_id)
+        _response.metadata.add_custom(metadata=metadata)
+        return _response

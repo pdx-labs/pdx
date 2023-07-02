@@ -1,4 +1,4 @@
 from pdx.agent import AgentBuilder as Agent
 
 
-__version__ = '0.2.0'
+PDX_VERSION = '0.2.0'

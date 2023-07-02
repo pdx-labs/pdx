@@ -7,9 +7,9 @@ if __name__ == '__main__':
     _response_text = text_agent.execute({
         '1_prompt': {'question': _question}
     })
-    print(_response_text)
+    print(_response_text.completion)
 
     _response_chat = chat_agent.execute({
         '2_user': {'question': _question}
     })
-    print(_response_chat)
+    print(_response_chat.completion)

@@ -57,8 +57,6 @@ class OpenAI(object):
             request_params['prompt'] = _prompt_session
             request_params['best_of'] = self._best_of
 
-        logger.debug(_prompt_session)
-
         return request_params
 
     def _postprocess(self, response: dict, request_params: dict, completion_time: float) -> ModelResponse:

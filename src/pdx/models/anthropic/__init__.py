@@ -38,8 +38,6 @@ class Anthropic(object):
             'top_k': self._top_k,
         }
 
-        logger.debug(_prompt_session)
-
         return request_params
 
     def _postprocess(self, response: dict, request_params: dict, completion_time) -> ModelResponse:

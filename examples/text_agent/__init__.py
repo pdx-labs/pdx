@@ -10,4 +10,4 @@ if __name__ == '__main__':
         '1_prompt': {'question': _question}
     })
 
-    print(_response)
+    print(_response.completion)

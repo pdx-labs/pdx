@@ -1,6 +1,6 @@
 import os
 import click
-from pdx import __version__
+from pdx.version import __version__
 from pdx.logger import logger
 from pdx.agent import AgentBuilder
 from pdx.agent.tester import AgentTestBuilder
@@ -35,8 +35,9 @@ def test(ctx, agent_name: str, template: str):
 @main.command("test")
 @click.argument("path", required=True, type=str)
 @click.option('--debug', is_flag=True, show_default=True, default=False, help='Enables the logging of all requests and responses to the console.')
+@click.option('--report', is_flag=True, show_default=True, default=False, help='Enables the generation of reports of the tests.')
 @click.pass_context
-def test(ctx, path: str, debug: bool):
+def test(ctx, path: str, debug: bool, report: bool):
 
     if debug:
         process.debug = True

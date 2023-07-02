@@ -10,4 +10,4 @@ if __name__ == '__main__':
         '2_user': {'question': _question}
     })
 
-    print(_response)
+    print(_response.completion)
