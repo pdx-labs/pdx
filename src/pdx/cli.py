@@ -34,13 +34,13 @@ def test(ctx, agent_name: str, template: str):
 
 @main.command("test")
 @click.argument("path", required=True, type=str)
-@click.option('--debug', is_flag=True, show_default=True, default=False, help='Enables the logging of all requests and responses to the console.')
+@click.option('-v', '--verbose', is_flag=True, show_default=True, default=False, help='Enables the logging of all requests and responses to the console.')
 @click.option('--report', is_flag=True, show_default=True, default=False, help='Enables the generation of reports of the tests.')
 @click.pass_context
-def test(ctx, path: str, debug: bool, report: bool):
+def test(ctx, path: str, verbose: bool, report: bool):
 
-    if debug:
-        process.debug = True
+    if verbose:
+        process.verbose = True
 
     api_keys = Keys()
     agent_path = os.path.join(os.getcwd(), path)

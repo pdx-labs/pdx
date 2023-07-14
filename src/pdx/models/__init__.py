@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from pdx.models.openai import OpenAI
 from pdx.models.anthropic import Anthropic
-from pdx.agent.prompt_session import PromptSession
+from pdx.prompt.prompt_chain import PromptChain
 from pdx.models.metadata import ModelResponse
 
 # Available LLM completion models
@@ -47,8 +47,8 @@ class CompletionModel(object):
 
         self._retries = 2
 
-    def run(self, prompt: PromptSession) -> ModelResponse:
+    def run(self, prompt: PromptChain) -> ModelResponse:
         return self._client.run(prompt)
 
-    async def arun(self, prompt: PromptSession) -> ModelResponse:
+    async def arun(self, prompt: PromptChain) -> ModelResponse:
         return await self._client.arun(prompt)

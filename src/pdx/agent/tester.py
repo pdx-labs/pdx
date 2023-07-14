@@ -7,8 +7,8 @@ import click
 from pdx.settings import process
 
 
-def prompt_echo_console(prompt_session: list):
-    for _p in prompt_session:
+def prompt_echo_console(prompt_chain: list):
+    for _p in prompt_chain:
         _role: str = _p['role']
         if _role != None:
             click.echo(
@@ -42,10 +42,10 @@ class AgentTestBuilder:
     async def run_test(self, _test_name, _test_input):
         logger.echo(f"Running: {_test_name}", event="test")
         _r = await self._agent.aexecute(_test_input)
-        logger.debug(f"Test {_test_name}: prompt\n")
-        if process.debug:
+        logger.verbose(f"Test {_test_name}: prompt\n")
+        if process.verbose:
             prompt_echo_console(_r.metadata.request.prompt)
-        logger.debug(f"Test {_test_name}: completion\n{_r.completion}")
+        logger.verbose(f"Test {_test_name}: completion\n{_r.completion}")
 
     async def run_tests(self):
         _test_run_list = []

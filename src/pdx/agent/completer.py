@@ -1,6 +1,6 @@
 from pdx.models import CompletionModel, ModelConfig
 from pdx.settings import Keys
-from pdx.agent.prompt_session import PromptSession
+from pdx.prompt.prompt_chain import PromptChain
 from pdx.agent.metadata import AgentID, RequestMetadata, AgentResponse, AgentResponseMetadata
 from pdx.logger import logger
 from uuid import uuid4
@@ -17,7 +17,7 @@ class CompletionAgent(object):
         self._model = CompletionModel(_api_key, model=model.id)
         self._retries = 2
 
-    def execute(self, prompt: PromptSession, request_values: dict, agent_id: AgentID = None) -> AgentResponse:
+    def execute(self, prompt: PromptChain, request_values: dict, agent_id: AgentID = None) -> AgentResponse:
         try_count = 0
         while (try_count <= self._retries):
             try:
@@ -39,12 +39,12 @@ class CompletionAgent(object):
                 )
                 return agent_response
             except Exception as e:
-                logger.debug(f"Completion model failed to run: {e}")
+                logger.verbose(f"Completion model failed to run: {e}")
                 try_count += 1
 
         raise ValueError("Completions model failed to run successfully.")
 
-    async def aexecute(self, prompt: PromptSession, request_values: dict, agent_id: AgentID = None) -> AgentResponse:
+    async def aexecute(self, prompt: PromptChain, request_values: dict, agent_id: AgentID = None) -> AgentResponse:
         try_count = 0
         while (try_count <= self._retries):
             try:
@@ -66,7 +66,7 @@ class CompletionAgent(object):
                 )
                 return agent_response
             except Exception as e:
-                logger.debug(f"Completion model failed to run: {e}")
+                logger.verbose(f"Completion model failed to run: {e}")
                 try_count += 1
 
         raise ValueError("Completions model failed to run successfully.")

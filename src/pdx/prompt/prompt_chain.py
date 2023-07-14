@@ -2,7 +2,7 @@ ANTHROPIC_CONSTANTS_HUMAN_PROMPT = '\n\nHuman:'
 ANTHROPIC_CONSTANTS_AI_PROMPT = '\n\nAssistant:'
 
 
-class PromptSession:
+class PromptChain:
     def __init__(self, prompt_type: str = None):
         self.session = []
         self.type = prompt_type

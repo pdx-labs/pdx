@@ -1,5 +1,5 @@
 from pdx.logger import logger
-from pdx.agent.prompt_session import PromptSession
+from pdx.prompt.prompt_chain import PromptChain
 from pdx.models.openai.client import OpenAIClient
 from pdx.models.metadata import ModelResponse, ResponseMetadata, ModelTokenUsage
 from time import time
@@ -32,7 +32,7 @@ class OpenAI(object):
         self._frequency_penalty = kwargs.get('frequency_penalty', 0)
         self._presence_penalty = kwargs.get('presence_penalty', 0)
 
-    def _preprocess(self, prompt: PromptSession):
+    def _preprocess(self, prompt: PromptChain):
         request_params = {
             "model": self._model,
             "max_tokens": self._max_tokens,
@@ -44,17 +44,17 @@ class OpenAI(object):
         }
         if self._client_type == "chat":
             if prompt.type == "text":
-                _prompt_session = prompt.text_to_chat_prompt_openai()
+                _prompt_chain = prompt.text_to_chat_prompt_openai()
             else:
-                _prompt_session = prompt.session
-            request_params['messages'] = _prompt_session
+                _prompt_chain = prompt.session
+            request_params['messages'] = _prompt_chain
 
         if self._client_type == "text":
             if prompt.type == "chat":
-                _prompt_session = prompt.chat_to_text_prompt_openai()
+                _prompt_chain = prompt.chat_to_text_prompt_openai()
             else:
-                _prompt_session = prompt.stitch_for_text_completion()
-            request_params['prompt'] = _prompt_session
+                _prompt_chain = prompt.stitch_for_text_completion()
+            request_params['prompt'] = _prompt_chain
             request_params['best_of'] = self._best_of
 
         return request_params
@@ -90,7 +90,7 @@ class OpenAI(object):
                 completion=response['choices'][0]['text'])
             return model_response
 
-    def run(self, prompt: PromptSession) -> ModelResponse:
+    def run(self, prompt: PromptChain) -> ModelResponse:
         start_time = time()
         request_params = self._preprocess(prompt)
         if self._client_type == "chat":
@@ -100,7 +100,7 @@ class OpenAI(object):
         completion_time = time() - start_time
         return self._postprocess(_r, request_params, completion_time)
 
-    async def arun(self, prompt: PromptSession) -> ModelResponse:
+    async def arun(self, prompt: PromptChain) -> ModelResponse:
         start_time = time()
         request_params = self._preprocess(prompt)
         if self._client_type == "chat":

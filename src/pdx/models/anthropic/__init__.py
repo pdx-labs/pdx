@@ -1,5 +1,5 @@
 from pdx.logger import logger
-from pdx.agent.prompt_session import PromptSession
+from pdx.prompt.prompt_chain import PromptChain
 from pdx.models.anthropic.client import AnthropicClient
 from pdx.models.anthropic.exceptions import handle_anthropic_prompt_validation
 from pdx.models.metadata import ModelResponse, ResponseMetadata, ModelTokenUsage
@@ -25,11 +25,11 @@ class Anthropic(object):
         self._top_p = kwargs.get('top_p', -1)
         self._top_k = kwargs.get('top_k', -1)
 
-    def _preprocess(self, prompt: PromptSession):
-        _prompt_session = prompt.session_to_prompt_anthropic()
-        handle_anthropic_prompt_validation(_prompt_session)
+    def _preprocess(self, prompt: PromptChain):
+        _prompt_chain = prompt.session_to_prompt_anthropic()
+        handle_anthropic_prompt_validation(_prompt_chain)
         request_params = {
-            'prompt': _prompt_session,
+            'prompt': _prompt_chain,
             'stop_sequences': self._stop_sequences,
             'model': self._model,
             'max_tokens_to_sample': self._max_tokens_to_sample,
@@ -61,14 +61,14 @@ class Anthropic(object):
 
         return model_response
 
-    def run(self, prompt: PromptSession) -> ModelResponse:
+    def run(self, prompt: PromptChain) -> ModelResponse:
         start_time = time()
         request_params = self._preprocess(prompt)
         _r = self._client.completion(**request_params)
         completion_time = time() - start_time
         return self._postprocess(_r, request_params, completion_time)
 
-    async def arun(self, prompt: PromptSession) -> ModelResponse:
+    async def arun(self, prompt: PromptChain) -> ModelResponse:
         start_time = time()
         request_params = self._preprocess(prompt)
         _r = await self._client.acompletion(**request_params)
