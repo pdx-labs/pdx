@@ -1,7 +1,7 @@
 import os
 from collections import OrderedDict
 from pdx.prompt.config import PromptConfig
-from pdx.agent.templater import TemplateAgent
+from pdx.prompt.prompt_template import PromptTemplate
 from pdx.prompt.prompt_chain import PromptChain
 
 
@@ -16,7 +16,7 @@ class TemplateConfig:
         self.template_path = os.path.join(tempaltes_path, self.name)
         self.id = self.name.split('.')[0]
 
-        self._template_agent = TemplateAgent(self.template_path, self.name)
+        self._template_agent = PromptTemplate(self.template_path, self.name)
         self.template_fields = self._template_agent._fields
 
     def execute(self, fields: dict, prompt_chain: PromptChain = None):
