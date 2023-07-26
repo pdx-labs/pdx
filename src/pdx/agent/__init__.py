@@ -2,7 +2,6 @@ from typing import List, Dict, Union
 from pdx.logger import logger
 from pdx.settings import Keys
 from pdx.prompt.prompt_tree import PromptTree, PromptChain
-from pdx.agent.completer import CompletionAgent
 from pdx.agent.config import AgentConfig
 from pdx.agent.metadata import AgentID, AgentResponse
 
@@ -34,6 +33,7 @@ class AgentBuilder:
     def execute(self, request: dict, metadata: dict = None) -> AgentResponse:
         _prompt = PromptChain(self._config.prompt_config.prompt_type)
         self.prompt_tree.execute(request, _prompt)
-        _response = self._completion_agent.execute(_prompt, request, self._agent_id)
+        _response = self._completion_agent.execute(
+            _prompt, request, self._agent_id)
         _response.metadata.add_custom(metadata=metadata)
         return _response
