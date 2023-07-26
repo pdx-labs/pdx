@@ -1,6 +1,6 @@
 from pprint import pprint
 from dataclasses import asdict
-from pdx import Worker, Prompt
+from pdx import Agent, Worker, Prompt
 from pdx.prompt.prompt_chain import PromptChain
 from pdx.models.openai import CompletionsModel as OpenAICompletionModel
 from pdx.models.anthropic import CompleteModel as AnthropicCompletionModel
@@ -34,7 +34,9 @@ if __name__ == '__main__':
     #     'user_0': {'question': _question},
     # })))
     completion_worker = Worker(prompt_chain, anthropic_completions)
-    _r = completion_worker.execute({
+    completion_agent = Agent(prompt_chain, anthropic_completions)
+
+    _r = completion_agent.execute({
         'system': {'role': _role},
         'user_0': {'question': _question},
     })

@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 from pdx.metadata import PDXMetadata
 from pdx.models.metadata import ResponseMetadata
 from pdx.logger import logger
-from pdx.version import __version__
 
 
 @dataclass
@@ -53,7 +52,7 @@ class WorkerResponseMetadata:
 
     def __post_init__(self):
         if self.pdx is None:
-            self.pdx = PDXMetadata(version=__version__)
+            self.pdx = PDXMetadata()
 
     def add_custom(self, metadata: dict):
         self.custom = metadata
