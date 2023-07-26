@@ -6,7 +6,7 @@ from pdx.models.openai.client import OpenAIClient
 from pdx.models.metadata import ModelResponse, ResponseMetadata, ModelTokenUsage
 
 
-class CompletionsModel(Model):
+class CompletionModel(Model):
     def __init__(self,
                  api_key: str,
                  model: str,

@@ -1,6 +1,6 @@
 import os
 from pdx.utils.rw import read_yaml
-from pdx.models import ModelConfig
+from pdx.models.config import ModelConfig
 from pdx.prompt.config import PromptConfig
 
 
@@ -25,6 +25,9 @@ class AgentConfig:
         if not os.path.exists(templates_path):
             raise ValueError(f"Templates folder not found in {folder_path}")
 
-        self.model_config = ModelConfig(**_config_dict['model'])
+        model_params = {key: value for key,
+                        value in _config_dict['model'].items() if key not in ['id']}
+        self.model_config = ModelConfig(
+            id=_config_dict['model']['id'], params=model_params)
         self.prompt_config = PromptConfig(
             _config_dict['prompt'], templates_path)

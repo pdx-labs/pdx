@@ -1,1 +1,1 @@
-from pdx.models.anthropic.complete import CompleteModel
+from pdx.models.anthropic.completion import CompletionModel

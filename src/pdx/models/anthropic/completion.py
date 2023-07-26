@@ -8,7 +8,7 @@ from pdx.models.anthropic.exceptions import handle_anthropic_prompt_validation
 from pdx.models.metadata import ModelResponse, ResponseMetadata, ModelTokenUsage
 
 
-class CompleteModel(object):
+class CompletionModel(object):
     def __init__(self,
                  api_key: str,
                  model: str,

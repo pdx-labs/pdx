@@ -1,1 +1,1 @@
-from pdx.models.openai.completions import CompletionsModel
+from pdx.models.openai.completion import CompletionModel
