@@ -38,5 +38,4 @@ def test_template_path_prompt(config):
 
     prompt = Prompt(template_path=config.template_path, pointer=config.pointer)
     _response = prompt.execute(config.template_context)
-    print(_response)
     assert _response == config.prompt_output

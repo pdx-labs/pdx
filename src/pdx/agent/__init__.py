@@ -5,7 +5,7 @@ from pdx.prompt.prompt_tree import PromptTree, PromptChain
 from pdx.agent.completer import CompletionAgent
 from pdx.agent.config import AgentConfig
 from pdx.agent.metadata import AgentID, AgentResponse
-from dataclasses import asdict
+
 
 Request = Union[str, int, float, Dict, List]
 

@@ -14,13 +14,16 @@ ANTHROPIC_MODELS = ["claude-v1", "claude-v1-100k", "claude-instant-v1", "claude-
 @dataclass
 class ModelConfig:
     id: str
+    provider: str = field(init=False)
     key_id: str = field(init=False)
 
     def __post_init__(self):
         if self.id in [*OPENAI_MODELS]:
             self.key_id = 'openai_key'
+            self.provider = 'openai'
         elif self.id in [*ANTHROPIC_MODELS]:
             self.key_id = 'anthropic_key'
+            self.provider = 'anthropic'
         else:
             raise ValueError(f"Model: {self.id} not supported")
 

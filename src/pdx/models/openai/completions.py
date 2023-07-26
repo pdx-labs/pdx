@@ -1,12 +1,12 @@
+from time import time
 from pdx.logger import logger
-from pdx.models.openai.completions import CompletionsModel
-from pdx.prompt.prompt_chain import PromptChain
+from pdx.models.model import Model
+from pdx.prompt.prompt_session import PromptSession
 from pdx.models.openai.client import OpenAIClient
 from pdx.models.metadata import ModelResponse, ResponseMetadata, ModelTokenUsage
-from time import time
 
 
-class OpenAI(object):
+class CompletionsModel(Model):
     def __init__(self,
                  api_key: str,
                  model: str,
@@ -22,6 +22,11 @@ class OpenAI(object):
         else:
             raise Exception("Model not supported")
 
+        if self._client_type == "chat":
+            self._api_url = "v1/chat/completions"
+        else:  # self._client_type == "text"
+            self._api_url = "v1/completions"
+
         self._provider = "openai"
         self._client = OpenAIClient(api_key)
         self._model = model
@@ -32,8 +37,9 @@ class OpenAI(object):
         self._best_of = kwargs.get('best_of', 1)
         self._frequency_penalty = kwargs.get('frequency_penalty', 0)
         self._presence_penalty = kwargs.get('presence_penalty', 0)
+        self._retries = kwargs.get('retries', 2)
 
-    def _preprocess(self, prompt: PromptChain):
+    def _preprocess(self, prompt: PromptSession) -> dict:
         request_params = {
             "model": self._model,
             "max_tokens": self._max_tokens,
@@ -44,23 +50,24 @@ class OpenAI(object):
             "stop": self._stop
         }
         if self._client_type == "chat":
-            if prompt.type == "text":
-                _prompt_chain = prompt.text_to_chat_prompt_openai()
+            if prompt.session_type == "text":
+                _content = prompt.text_prompt({})
+                _chat_prompt = [{"role": "user", "content": _content}]
             else:
-                _prompt_chain = prompt.session
-            request_params['messages'] = _prompt_chain
+                _chat_prompt = prompt.chat_prompt()
+            request_params['messages'] = _chat_prompt
 
         if self._client_type == "text":
-            if prompt.type == "chat":
-                _prompt_chain = prompt.chat_to_text_prompt_openai()
+            if prompt.session_type == "chat":
+                _text_prompt = prompt.text_prompt()
             else:
-                _prompt_chain = prompt.stitch_for_text_completion()
-            request_params['prompt'] = _prompt_chain
+                _text_prompt = prompt.text_prompt({})
+            request_params['prompt'] = _text_prompt
             request_params['best_of'] = self._best_of
 
         return request_params
 
-    def _postprocess(self, response: dict, request_params: dict, completion_time: float) -> ModelResponse:
+    def _postprocess(self, response: dict, request_params: dict, request_time: float) -> ModelResponse:
         token_usage = ModelTokenUsage(
             completion=response['usage']['completion_tokens'],
             prompt=response['usage']['prompt_tokens'],
@@ -71,7 +78,7 @@ class OpenAI(object):
             stop=response['choices'][0]['finish_reason'],
             stop_reason=response['choices'][0]['finish_reason'],
             token_usage=token_usage,
-            completion_time=completion_time)
+            completion_time=request_time)
 
         if self._client_type == "chat":
             params = {key: value for key,
@@ -91,22 +98,46 @@ class OpenAI(object):
                 completion=response['choices'][0]['text'])
             return model_response
 
-    def run(self, prompt: PromptChain) -> ModelResponse:
+    def execute(self, prompt: PromptSession) -> ModelResponse:
         start_time = time()
         request_params = self._preprocess(prompt)
-        if self._client_type == "chat":
-            _r = self._client.completion_chat(**request_params)
-        if self._client_type == "text":
-            _r = self._client.completion(**request_params)
-        completion_time = time() - start_time
-        return self._postprocess(_r, request_params, completion_time)
 
-    async def arun(self, prompt: PromptChain) -> ModelResponse:
+        _try_count = 0
+        while (_try_count <= self._retries):
+            try:
+                _r = self._client.request(
+                    "post",
+                    self._api_url,
+                    params=request_params,
+                )
+                request_time = time() - start_time
+                return self._postprocess(_r, request_params, request_time)
+            except Exception as e:
+                logger.verbose(
+                    f"{self._provider} {self._model} model failed to run.\nReason: {e}")
+                _try_count += 1
+
+        raise ValueError(
+            f"{self._provider} {self._model} model failed to run successfully.")
+
+    async def aexecute(self, prompt: PromptSession) -> ModelResponse:
         start_time = time()
         request_params = self._preprocess(prompt)
-        if self._client_type == "chat":
-            _r = await self._client.acompletion_chat(**request_params)
-        if self._client_type == "text":
-            _r = await self._client.acompletion(**request_params)
-        completion_time = time() - start_time
-        return self._postprocess(_r, request_params, completion_time)
+
+        _try_count = 0
+        while (_try_count <= self._retries):
+            try:
+                _r = await self._client.arequest(
+                    "post",
+                    self._api_url,
+                    params=request_params,
+                )
+                request_time = time() - start_time
+                return self._postprocess(_r, request_params, request_time)
+            except Exception as e:
+                logger.verbose(
+                    f"{self._provider} {self._model} model failed to run.\nReason: {e}")
+                _try_count += 1
+
+        raise ValueError(
+            f"{self._provider} {self._model} model failed to run successfully.")
