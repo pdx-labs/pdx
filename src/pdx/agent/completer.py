@@ -1,4 +1,4 @@
-from pdx.models import CompletionModel, ModelConfig
+from pdx.models import ModelConfig
 from pdx.settings import Keys
 from pdx.prompt.prompt_chain import PromptChain
 from pdx.agent.metadata import AgentID, RequestMetadata, AgentResponse, AgentResponseMetadata
@@ -14,7 +14,7 @@ class CompletionAgent(object):
             raise ValueError(
                 f"{model.key_id.capitalize()} API key not found")
 
-        self._model = CompletionModel(_api_key, model=model.id)
+        # self._model = CompletionModel(_api_key, model=model.id)
         self._retries = 2
 
     def execute(self, prompt: PromptChain, request_values: dict, agent_id: AgentID = None) -> AgentResponse:
