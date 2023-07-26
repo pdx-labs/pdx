@@ -27,6 +27,12 @@ if __name__ == '__main__':
     _role = 'Chemist'
     _question = 'What are the uses of Glucose?'
 
+    # pprint(prompt_1.execute())
+
+    # pprint(openai_completions.execute(prompt_chain.execute({
+    #     'system': {'role': _role},
+    #     'user_0': {'question': _question},
+    # })))
     completion_worker = Worker(prompt_chain, anthropic_completions)
     _r = completion_worker.execute({
         'system': {'role': _role},

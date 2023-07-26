@@ -35,8 +35,7 @@ class Worker:
         return worker_response
 
     async def aexecute(self, request: dict = {}, metadata: dict = {}):
-        _prompt_session = PromptSession()
-        _prompt_session.execute(self._prompt, request)
+        _prompt_session = self._prompt.execute(request)
         _model_response = await self._model.aexecute(_prompt_session)
         _worker_response = self._postprocess(
             _model_response, request, _prompt_session)
@@ -45,7 +44,7 @@ class Worker:
 
     def execute(self, request: dict = {}, metadata: dict = {}):
         _prompt_session = PromptSession()
-        _prompt_session.execute(self._prompt, request)
+        _prompt_session = self._prompt.execute(request)
         _model_response = self._model.execute(_prompt_session)
         _worker_response = self._postprocess(
             _model_response, request, _prompt_session)

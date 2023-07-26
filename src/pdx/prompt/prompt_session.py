@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import List, Union, Dict
-from pdx.prompt import Prompt
-from pdx.prompt.prompt_chain import PromptChain
-from pdx.prompt.prompt_tree import PromptTree
+# from pdx.prompt import Prompt
+# from pdx.prompt.prompt_chain import PromptChain
+# from pdx.prompt.prompt_tree import PromptTree
 
 
 @dataclass
@@ -17,22 +17,28 @@ class PromptSession:
         self.items: List[PromptSessionItem] = []
         self.session_type = 'text'  # text, chat
 
+    def __str__(self):
+        return f"{self.items}"
+    
+    def __repr__(self):
+        return f"{self.items}"
+
     def add(self, content: str, role: str = None, content_type: str = 'text'):
         self.items.append(PromptSessionItem(
             content=content, content_type=content_type, role=role))
 
-    def execute(self, prompt: Union[Prompt, PromptChain, PromptTree], request: Dict):
-        if isinstance(prompt, Prompt):
-            prompt_pointer_request = request.get(prompt.pointer, {})
-            content = prompt.execute(prompt_pointer_request)
-            self.add(content=content, role=prompt.role)
-        elif isinstance(prompt, PromptChain):
-            for _prompt in prompt._chain:
-                prompt_pointer_request = request.get(_prompt.pointer, {})
-                content = _prompt.execute(prompt_pointer_request)
-                self.add(content=content, role=_prompt.role)
-        elif isinstance(prompt, PromptTree):
-            raise Exception('PromptTree not implemented.')
+    # def execute(self, prompt: Union[Prompt, PromptChain, PromptTree], request: Dict):
+    #     if isinstance(prompt, Prompt):
+    #         prompt_pointer_request = request.get(prompt.pointer, {})
+    #         content = prompt.execute(prompt_pointer_request)
+    #         self.add(content=content, role=prompt.role)
+    #     elif isinstance(prompt, PromptChain):
+    #         for _prompt in prompt._chain:
+    #             prompt_pointer_request = request.get(_prompt.pointer, {})
+    #             content = _prompt.execute(prompt_pointer_request)
+    #             self.add(content=content, role=_prompt.role)
+    #     elif isinstance(prompt, PromptTree):
+    #         raise Exception('PromptTree not implemented.')
 
     def text_prompt(self, role_constants: dict = {
         'user': '\n\nUSER',

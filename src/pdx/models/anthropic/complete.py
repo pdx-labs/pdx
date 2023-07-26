@@ -42,7 +42,6 @@ class CompleteModel(object):
             _prompt = f"{constants.HUMAN_PROMPT} {_content}{constants.AI_PROMPT}"
 
         handle_anthropic_prompt_validation(_prompt)
-        print(_prompt)
         request_params = {
             'prompt': _prompt,
             'stop_sequences': self._stop_sequences,

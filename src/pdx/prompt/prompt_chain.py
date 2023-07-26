@@ -1,61 +1,33 @@
 from typing import List
 from pdx.prompt import Prompt
-
-ANTHROPIC_CONSTANTS_HUMAN_PROMPT = '\n\nHuman:'
-ANTHROPIC_CONSTANTS_AI_PROMPT = '\n\nAssistant:'
+from pdx.prompt.prompt_session import PromptSession, PromptSessionItem
 
 
 class PromptChain:
-    def __init__(self, prompts: List[Prompt] = None, prompt_type: str = None):
+    def __init__(self, prompts: List[Prompt] = None):
         self._chain = prompts
-        self._session = []
-        self.type = prompt_type
 
-    def add(self, prompt: str, role: str):
-        self._session.append({
-            'content': prompt,
-            'role': role
-        })
+    def execute(self, values: dict = {}):
+        _session_type = None
+        _prompt_session = PromptSession()
+        for _prompt in self._chain:
+            prompt_pointer_request = values.get(_prompt.pointer, {})
+            _session_item = _prompt.execute(
+                prompt_pointer_request, _output_item=True)
 
-    def stitch_for_text_completion(self):
-        _prompt = ''
-        for _session in self._session:
-            _prompt += _session['content']
-        return _prompt
+            if _session_type == None:
+                if _session_item.role == 'template':
+                    _session_type = 'text'
+                else:
+                    _session_type = 'chat'
+            else:
+                if _session_type == 'text' and _session_item.role != 'template':
+                    raise ValueError(
+                        'Cannot mix chat and text prompts in a chain.')
+                elif _session_type == 'chat' and _session_item.role == 'template':
+                    raise ValueError(
+                        'Cannot mix chat and text prompts in a chain.')
 
-    def chat_to_text_prompt_openai(self):
-        prompt = ''
-        for message in self._session:
-            if message['role'] == 'user':
-                prompt += f"\n\nUSER {message['content']}"
-            elif message['role'] == 'assistant':
-                prompt += f"\n\nASSISTANT {message['content']}"
-            elif message['role'] == 'system':
-                prompt += f"\n\nSYSTEM {message['content']}"
+            _prompt_session.items.append(_session_item)
 
-        prompt += f"\n\nASSISTANT"
-        return prompt
-
-    def text_to_chat_prompt_openai(self):
-        prompt = self.stitch_for_text_completion()
-        messages = [
-            {"role": "user", "content": prompt}
-        ]
-        return messages
-
-    def session_to_prompt_anthropic(self):
-        if self.type == 'chat':
-            prompt = ''
-            for message in self._session:
-                if message['role'] == 'user':
-                    prompt += f"{ANTHROPIC_CONSTANTS_HUMAN_PROMPT} {message['content']}"
-                elif message['role'] == 'assistant':
-                    prompt += f"{ANTHROPIC_CONSTANTS_AI_PROMPT} {message['content']}"
-                elif message['role'] == 'system':
-                    prompt += f"{ANTHROPIC_CONSTANTS_HUMAN_PROMPT} {message['content']}"
-
-            prompt += f"{ANTHROPIC_CONSTANTS_AI_PROMPT}"
-            return prompt
-        elif self.type == 'text':
-            prompt = self.stitch_for_text_completion()
-            return f"{ANTHROPIC_CONSTANTS_HUMAN_PROMPT} {prompt}{ANTHROPIC_CONSTANTS_AI_PROMPT}"
+        return _prompt_session
