@@ -2,7 +2,7 @@ import os
 from collections import OrderedDict
 from pdx.prompt.config import PromptConfig
 from pdx.prompt.prompt_template import PromptTemplate
-from pdx.prompt.prompt_chain import PromptChain
+from pdx.prompt.prompt_session import PromptSession
 
 
 class TemplateConfig:
@@ -19,11 +19,12 @@ class TemplateConfig:
         self._template_agent = PromptTemplate(self.template_path, self.name)
         self.template_fields = self._template_agent._fields
 
-    def execute(self, fields: dict, prompt_chain: PromptChain = None):
+    def execute(self, fields: dict, prompt_session: PromptSession = None):
         if fields is None:
             fields = {}
         prompt = self._template_agent.execute(fields)
-        prompt_chain.add(prompt, self.role)
+        print(prompt)
+        prompt_session.add(prompt, self.role)
 
 
 class WhenOperationConfig:
@@ -33,9 +34,9 @@ class WhenOperationConfig:
         self.prompt_config = config['prompt']
         self.prompt_tree = None
 
-    def execute(self, fields: dict, prompt_chain: PromptChain = None):
+    def execute(self, fields: dict, prompt_session: PromptSession = None):
         if fields != {}:
-            self.prompt_tree.execute(fields, prompt_chain)
+            self.prompt_tree.execute(fields, prompt_session)
 
 
 class LoopOperationConfig:
@@ -45,9 +46,9 @@ class LoopOperationConfig:
         self.prompt_config = config['prompt']
         self.prompt_tree = None
 
-    def execute(self, fields: dict, prompt_chain: PromptChain = None):
+    def execute(self, fields: dict, prompt_session: PromptSession = None):
         for field in fields:
-            self.prompt_tree.execute(field, prompt_chain)
+            self.prompt_tree.execute(field, prompt_session)
 
 
 class SwitchOperationConfig:
@@ -57,13 +58,13 @@ class SwitchOperationConfig:
         self.cases_config = config['prompt']
         self.prompt_tree = None
 
-    def execute(self, fields: dict, prompt_chain: PromptChain = None):
+    def execute(self, fields: dict, prompt_session: PromptSession = None):
         for case, field in fields.items():
             if case in self.prompt_tree:
-                self.prompt_tree[case].execute(field, prompt_chain)
+                self.prompt_tree[case].execute(field, prompt_session)
             elif 'default' in self.prompt_tree:
                 self.prompt_tree['default'].execute(
-                    field, prompt_chain)
+                    field, prompt_session)
 
 
 class PromptTree:
@@ -112,12 +113,21 @@ class PromptTree:
 
         return _tree
 
-    def execute(self, request, prompt_chain: PromptChain):
+    def execute(self, request, prompt_session: PromptSession = None):
+        _output = False
+
+        if prompt_session is None:
+            prompt_session = PromptSession()
+            _output = True
+
         for key, value in self.tree.items():
             if self._strict:
                 if key in request:
                     field_values = request.get(key, {})
-                    value.execute(field_values, prompt_chain)
+                    value.execute(field_values, prompt_session)
             else:
                 field_values = request.get(key, {})
-                value.execute(field_values, prompt_chain)
+                value.execute(field_values, prompt_session)
+        
+        if _output:
+            return prompt_session
