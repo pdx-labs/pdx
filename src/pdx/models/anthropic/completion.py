@@ -58,7 +58,7 @@ class CompletionModel(object):
         params = {key: value for key,
                   value in request_params.items() if key != 'prompt'}
         token_usage = ModelTokenUsage(
-            completion=None,
+            response=None,
             prompt=None,
             total=None)
         response_metadata = ResponseMetadata(
@@ -67,11 +67,11 @@ class CompletionModel(object):
             stop=response['stop'],
             stop_reason=response['stop'],
             token_usage=token_usage,
-            completion_time=request_time)
+            latency=request_time)
         model_response = ModelResponse(
             metadata=response_metadata,
             request_params=params,
-            completion=response['completion'])
+            data=response['completion'])
 
         return model_response
 

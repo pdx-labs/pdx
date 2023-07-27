@@ -29,7 +29,7 @@ class Worker:
             response=response.metadata
         )
         worker_response = WorkerResponse(
-            data=response.completion,
+            data=response.data,
             metadata=metadata
         )
         return worker_response

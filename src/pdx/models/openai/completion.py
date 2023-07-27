@@ -69,7 +69,7 @@ class CompletionModel(Model):
 
     def _postprocess(self, response: dict, request_params: dict, request_time: float) -> ModelResponse:
         token_usage = ModelTokenUsage(
-            completion=response['usage']['completion_tokens'],
+            response=response['usage']['completion_tokens'],
             prompt=response['usage']['prompt_tokens'],
             total=response['usage']['total_tokens'])
         response_metadata = ResponseMetadata(
@@ -78,7 +78,7 @@ class CompletionModel(Model):
             stop=response['choices'][0]['finish_reason'],
             stop_reason=response['choices'][0]['finish_reason'],
             token_usage=token_usage,
-            completion_time=request_time)
+            latency=request_time)
 
         if self._client_type == "chat":
             params = {key: value for key,
@@ -86,7 +86,7 @@ class CompletionModel(Model):
             model_response = ModelResponse(
                 metadata=response_metadata,
                 request_params=params,
-                completion=response['choices'][0]['message']['content'])
+                data=response['choices'][0]['message']['content'])
             return model_response
 
         if self._client_type == "text":
@@ -95,7 +95,7 @@ class CompletionModel(Model):
             model_response = ModelResponse(
                 metadata=response_metadata,
                 request_params=params,
-                completion=response['choices'][0]['text'])
+                data=response['choices'][0]['text'])
             return model_response
 
     def execute(self, prompt: PromptSession) -> ModelResponse:

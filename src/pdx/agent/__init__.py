@@ -48,7 +48,7 @@ class Agent(object):
             response=response.metadata
         )
         agent_response = AgentResponse(
-            data=response.completion,
+            data=response.data,
             metadata=metadata
         )
         return agent_response

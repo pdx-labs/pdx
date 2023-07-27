@@ -41,7 +41,7 @@ class Model:
 
     def _postprocess(self, response: dict, request_params: dict, request_time: float) -> ModelResponse:
         token_usage = ModelTokenUsage(
-            completion=response['usage']['completion_tokens'],
+            response=response['usage']['completion_tokens'],
             prompt=response['usage']['prompt_tokens'],
             total=response['usage']['total_tokens']
         )
@@ -51,14 +51,14 @@ class Model:
             stop=response['choices'][0]['finish_reason'],
             stop_reason=response['choices'][0]['finish_reason'],
             token_usage=token_usage,
-            completion_time=request_time)
+            latency=request_time)
 
         params = {key: value for key,
                   value in request_params.items() if key != 'prompt'}
         model_response = ModelResponse(
             metadata=response_metadata,
             request_params=params,
-            completion=response['choices'][0]['text'])
+            data=response['choices'][0]['text'])
         return model_response
 
     def execute(self, prompt: PromptSession) -> ModelResponse:
