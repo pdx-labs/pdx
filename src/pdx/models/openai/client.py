@@ -43,8 +43,8 @@ class OpenAIClient(APIClient):
                 data = json.dumps(params).encode()
             else:
                 raise ValueError(f"Unrecognized method: {method}")
-            
-        # If we're requesting a stream from the server, let's tell requests to expect the same
+
+        # TODO: Add support for stream, tell requests if to expect a stream
         stream = params.get("stream", None)
         return APIRequest(
             method,
@@ -63,31 +63,3 @@ class OpenAIClient(APIClient):
         if isinstance(response, aiohttp.ClientResponse):
             if response.status != 200:
                 handle_openai_request_error(response.status, content)
-
-    def completion(self, **kwargs) -> dict:
-        return self.request(
-            "post",
-            "v1/completions",
-            params=kwargs,
-        )
-
-    async def acompletion(self, **kwargs) -> dict:
-        return await self.arequest(
-            "post",
-            "v1/completions",
-            params=kwargs,
-        )
-    
-    def completion_chat(self, **kwargs) -> dict:
-        return self.request(
-            "post",
-            "v1/chat/completions",
-            params=kwargs,
-        )
-
-    async def acompletion_chat(self, **kwargs) -> dict:
-        return await self.arequest(
-            "post",
-            "v1/chat/completions",
-            params=kwargs,
-        )

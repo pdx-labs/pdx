@@ -1,4 +1,8 @@
-from pdx.agent import AgentBuilder as Agent
+from pdx.agent import Agent
+from pdx.prompt import Prompt
+from pdx.prompt.prompt_chain import PromptChain
+from pdx.prompt.prompt_tree import PromptTree
+from pdx.worker import Worker
+from pdx.metadata import PDXMetadata
 
-
-PDX_VERSION = '0.2.0'
+pdx_metadata = PDXMetadata()

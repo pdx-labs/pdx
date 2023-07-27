@@ -1,21 +1,18 @@
 import os
 import click
-from pdx.version import __version__
+from pdx import pdx_metadata
 from pdx.logger import logger
-from pdx.agent import AgentBuilder
+from pdx.agent import Agent
 from pdx.agent.tester import AgentTestBuilder
 from pdx.settings import Keys, process
 from pdx.commands.create import create_agent
 
 
 @click.group()
-@click.option('--version', is_flag=True, show_default=True, default=False, help='Version of the installed `pdx` package.')
+@click.version_option(pdx_metadata.version, message=f'\n{click.style("PDX", fg="magenta")} installed version: {click.style("%(version)s", fg="magenta")}\n')
 @click.pass_context
-def main(ctx, version: bool):
+def main(ctx):
     ctx.ensure_object(dict)
-
-    if version:
-        click.echo(__version__)
 
 
 @main.command("create")
@@ -34,16 +31,15 @@ def test(ctx, agent_name: str, template: str):
 
 @main.command("test")
 @click.argument("path", required=True, type=str)
-@click.option('--debug', is_flag=True, show_default=True, default=False, help='Enables the logging of all requests and responses to the console.')
+@click.option('-v', '--verbose', is_flag=True, show_default=True, default=False, help='Enables the logging of all requests and responses to the console.')
 @click.option('--report', is_flag=True, show_default=True, default=False, help='Enables the generation of reports of the tests.')
 @click.pass_context
-def test(ctx, path: str, debug: bool, report: bool):
+def test(ctx, path: str, verbose: bool, report: bool):
 
-    if debug:
-        process.debug = True
+    if verbose:
+        process.verbose = True
 
-    api_keys = Keys()
     agent_path = os.path.join(os.getcwd(), path)
-    _agent = AgentBuilder(agent_path, api_keys)
+    _agent = Agent(agent_path)
     _tester = AgentTestBuilder(agent_path, _agent)
     _tester.execute()

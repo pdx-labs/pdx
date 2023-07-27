@@ -87,26 +87,12 @@ class AnthropicClient(APIClient):
             stream,
             request_timeout or self.request_timeout,
         )
-    
+
     def _response_middleware(self, response: Union[requests.Response, aiohttp.ClientResponse], content: str) -> dict:
         if isinstance(response, requests.Response):
             if response.status_code != 200:
                 handle_anthropic_request_error(response.status_code, content)
-        
+
         if isinstance(response, aiohttp.ClientResponse):
             if response.status != 200:
                 handle_anthropic_request_error(response.status, content)
-
-    def completion(self, **kwargs) -> dict:
-        return self.request(
-            "post",
-            "v1/complete",
-            params=kwargs,
-        )
-
-    async def acompletion(self, **kwargs) -> dict:
-        return await self.arequest(
-            "post",
-            "v1/complete",
-            params=kwargs,
-        )

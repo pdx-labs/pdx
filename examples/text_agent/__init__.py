@@ -1,6 +1,7 @@
 import os
 from pdx import Agent
 
+
 text_agent = Agent(os.path.dirname(__file__))
 
 if __name__ == '__main__':
@@ -10,4 +11,4 @@ if __name__ == '__main__':
         '1_prompt': {'question': _question}
     })
 
-    print(_response.completion)
+    print(_response.data)

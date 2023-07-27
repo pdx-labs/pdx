@@ -50,12 +50,12 @@ class Logger:
             else:
                 print(msg)
 
-    def debug(self, msg: Union[str, dict], event: str = 'debug'):
+    def verbose(self, msg: Union[str, dict], event: str = 'verbose'):
         '''
         Example usage:            
-            logger.debug(msg="A debug message.")
+            logger.verbose(msg="A verbose message.")
         '''
-        if process.debug:
+        if process.verbose:
             if self.options['console_log']:
                 if self.options['use_click']:
                     self._click_echo(msg=msg, event=event)

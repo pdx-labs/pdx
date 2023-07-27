@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 @dataclass
 class ModelTokenUsage:
-    completion: int = None
+    response: int = None
     prompt: int = None
     total: int = None
 
@@ -15,11 +15,11 @@ class ResponseMetadata:
     stop: str = None
     stop_reason: str = None
     token_usage: ModelTokenUsage = None
-    completion_time: float = None
+    latency: float = None
 
 @dataclass
 class ModelResponse:
     metadata: ResponseMetadata = None
     request_params: dict = None
-    completion: str = None
+    data: str = None
     

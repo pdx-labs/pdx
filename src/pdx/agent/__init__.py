@@ -1,39 +1,70 @@
-from typing import List, Dict, Union
-from pdx.logger import logger
-from pdx.settings import Keys
-from pdx.agent.completer import CompletionAgent
-from pdx.agent.prompt import PromptTree, PromptSession
+from typing import Union
+from uuid import uuid4
 from pdx.agent.config import AgentConfig
-from pdx.agent.metadata import AgentID, AgentResponse
-from dataclasses import asdict
+from pdx.prompt import Prompt
+from pdx.models.model import Model
+from pdx.prompt.prompt_chain import PromptChain
+from pdx.prompt.prompt_tree import PromptTree
+from pdx.prompt.prompt_session import PromptSession
+from pdx.models.metadata import ModelResponse
+from pdx.agent.metadata import AgentID, RequestMetadata, AgentResponse, AgentResponseMetadata
 
-Request = Union[str, int, float, Dict, List]
 
+class Agent(object):
+    def __init__(self, path: str = None, prompt: Union[Prompt, PromptChain, PromptTree] = None, model: Model = None):
+        if path is not None:
+            self._type = 'config'
+            self._config: AgentConfig = AgentConfig(path)
+            self._agent_id = AgentID(agent_name=self._config.name)
+            if prompt is None:
+                self._prompt: PromptTree = PromptTree(
+                    self._config.prompt_config)
+            else:
+                self._prompt = prompt
 
-class AgentBuilder:
-    def __init__(self, path: str, api_keys: Keys = None):
-        self._folder_path = path
-        if api_keys is None:
-            self._api_keys = Keys()
+            if model is None:
+                self._model: Model = self._config.model_config.build_model()
+            else:
+                self._model = model
         else:
-            self._api_keys = api_keys
-        self._config: AgentConfig = AgentConfig(path)
-        self.prompt_tree: PromptTree = PromptTree(self._config.prompt_config)
-        self._completion_agent = CompletionAgent(
-            self._config.model_config, self._api_keys)
+            if prompt is None and model is None:
+                raise ValueError(
+                    'Provide `Prompt` and `Model` if not providing Agent config path.')
+            self._type = 'prompt-model'
+            self._prompt = prompt
+            self._model = model
+            self._agent_id = AgentID(agent_name='agent')
 
-        self._agent_id = AgentID(agent_name=self._config.name)
+    def _postprocess(self, response: ModelResponse, request: dict, prompt_session: PromptSession) -> AgentResponse:
+        request_metadata = RequestMetadata(
+            agent_id=self._agent_id,
+            request_id=uuid4(),
+            request_values=request,
+            request_params=response.request_params,
+            prompt=prompt_session.export()
+        )
+        metadata = AgentResponseMetadata(
+            request=request_metadata,
+            response=response.metadata
+        )
+        agent_response = AgentResponse(
+            data=response.data,
+            metadata=metadata
+        )
+        return agent_response
 
-    async def aexecute(self, request: dict, metadata: dict = None) -> AgentResponse:
-        _prompt = PromptSession(self._config.prompt_config.prompt_type)
-        self.prompt_tree.execute(request, _prompt)
-        _response = await self._completion_agent.aexecute(_prompt, request, self._agent_id)
-        _response.metadata.add_custom(metadata=metadata)
-        return _response
+    async def aexecute(self, request: dict = {}, metadata: dict = {}):
+        _prompt_session = self._prompt.execute(request)
+        _model_response = await self._model.aexecute(_prompt_session)
+        _agent_response = self._postprocess(
+            _model_response, request, _prompt_session)
+        _agent_response.metadata.add_custom(metadata=metadata)
+        return _agent_response
 
-    def execute(self, request: dict, metadata: dict = None) -> AgentResponse:
-        _prompt = PromptSession(self._config.prompt_config.prompt_type)
-        self.prompt_tree.execute(request, _prompt)
-        _response = self._completion_agent.execute(_prompt, request, self._agent_id)
-        _response.metadata.add_custom(metadata=metadata)
-        return _response
+    def execute(self, request: dict = {}, metadata: dict = {}):
+        _prompt_session = self._prompt.execute(request)
+        _model_response = self._model.execute(_prompt_session)
+        _agent_response = self._postprocess(
+            _model_response, request, _prompt_session)
+        _agent_response.metadata.add_custom(metadata=metadata)
+        return _agent_response

@@ -7,8 +7,8 @@ from pdx.logger import logger
 
 
 @dataclass
-class AgentID:
-    agent_name: str
+class WorkerID:
+    worker_name: str
     git_hash: str = None
     git_branch: str = None
 
@@ -32,7 +32,7 @@ class AgentID:
 
 @dataclass
 class RequestMetadata:
-    agent_id: AgentID
+    worker_id: WorkerID
     request_id: uuid.UUID = None
     request_values: dict = None
     request_params: dict = None
@@ -44,7 +44,7 @@ class RequestMetadata:
 
 
 @dataclass
-class AgentResponseMetadata:
+class WorkerResponseMetadata:
     request: RequestMetadata
     response: ResponseMetadata
     custom: dict = None
@@ -59,6 +59,6 @@ class AgentResponseMetadata:
 
 
 @dataclass
-class AgentResponse:
+class WorkerResponse:
     data: str
-    metadata: AgentResponseMetadata
+    metadata: WorkerResponseMetadata

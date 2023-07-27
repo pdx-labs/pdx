@@ -1,14 +1,14 @@
 import os
 import asyncio
-from pdx.agent import AgentBuilder
+from pdx.agent import Agent
 from pdx.utils.rw import read_yaml
 from pdx.logger import logger
 import click
 from pdx.settings import process
 
 
-def prompt_echo_console(prompt_session: list):
-    for _p in prompt_session:
+def prompt_echo_console(prompt_chain: list):
+    for _p in prompt_chain:
         _role: str = _p['role']
         if _role != None:
             click.echo(
@@ -17,7 +17,7 @@ def prompt_echo_console(prompt_session: list):
 
 
 class AgentTestBuilder:
-    def __init__(self, folder_path: str, agent: AgentBuilder):
+    def __init__(self, folder_path: str, agent: Agent):
         self._folder_path = folder_path
         self._agent = agent
         self._test_cases = self.build_tests()
@@ -42,10 +42,10 @@ class AgentTestBuilder:
     async def run_test(self, _test_name, _test_input):
         logger.echo(f"Running: {_test_name}", event="test")
         _r = await self._agent.aexecute(_test_input)
-        logger.debug(f"Test {_test_name}: prompt\n")
-        if process.debug:
+        logger.verbose(f"Test {_test_name}: prompt\n")
+        if process.verbose:
             prompt_echo_console(_r.metadata.request.prompt)
-        logger.debug(f"Test {_test_name}: completion\n{_r.completion}")
+        logger.verbose(f"Test {_test_name}: completion\n{_r.data}")
 
     async def run_tests(self):
         _test_run_list = []

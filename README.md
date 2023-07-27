@@ -29,7 +29,7 @@ pdx create my_first_agent
 Run and test out the agent by running:
 
 ```bash
-pdx test my_first_agent --debug
+pdx test my_first_agent --verbose
 ```
 
 More information here: [PDX - Main Concepts](https://pdxlabs.io/docs/getting-started/main-concepts)

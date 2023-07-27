@@ -9,7 +9,7 @@ class Keys(BaseSettings):
 
 class Process(BaseModel):
     env: str = 'dev'
-    debug: bool = False
+    verbose: bool = False
 
 
 process = Process()
