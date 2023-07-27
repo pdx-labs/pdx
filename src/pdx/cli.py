@@ -1,5 +1,6 @@
 import os
 import click
+from pdx import pdx_metadata
 from pdx.logger import logger
 from pdx.agent import Agent
 from pdx.agent.tester import AgentTestBuilder
@@ -8,13 +9,10 @@ from pdx.commands.create import create_agent
 
 
 @click.group()
-@click.option('--version', is_flag=True, show_default=True, default=False, help='Version of the installed `pdx` package.')
+@click.version_option(pdx_metadata.version, message=f'\n{click.style("PDX", fg="magenta")} installed version: {click.style("%(version)s", fg="magenta")}\n')
 @click.pass_context
-def main(ctx, version: bool):
+def main(ctx):
     ctx.ensure_object(dict)
-
-    if version:
-        click.echo('0.5.0')
 
 
 @main.command("create")
