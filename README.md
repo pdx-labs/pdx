@@ -40,9 +40,10 @@ More information here: [PDX - Main Concepts](https://pdxlabs.io/docs/getting-sta
 -   📂 Mental model to separate prompt templates from the application code. (Similar to Flask blueprint or FastAPI router).
 -   📌 Version control the prompts along with their evaluation metrics.
 -   📸 Logging and tracing of inputs, prompt render, and model response made easy.
--   📩 Log feedback of the user. (Coming soon)
--   📊 Observability out-of-the-box. (Coming soon)
+-   🧯 Standardize Error handling and logging.
 -   💾 Caching for lowering latency. (Coming soon)
+-   📊 Observability out-of-the-box. (Coming soon)
+-   📩 Log feedback of the user. (Coming soon)
 -   🛎️ A/B testing of prompts. (Coming soon)
 
 ## [Demos](https://github.com/pdx-labs/demos)
