@@ -4,7 +4,7 @@ from pdx import Agent, Worker, Prompt
 from pdx.prompt.prompt_chain import PromptChain
 from pdx.models.openai import CompletionModel as OpenAICompletioModel
 from pdx.models.anthropic import CompletionModel as AnthropicCompletionModel
-from pdx.settings import Keys
+from pdx.models.config import Keys
 
 keys = Keys()
 

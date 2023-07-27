@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pdx"
-version = "0.5.0"
+version = "0.5.1"
 description = "Prompt Engineering and Dev-Ops toolkits. A faster way to build and manage applications powered by Language Models."
 keywords = ["prompt", "LLM", "prompt engineering", "dev-ops", "observability", "apps"]
 authors = ["Adithya Krishnan <krishsandeep@gmail.com>"]

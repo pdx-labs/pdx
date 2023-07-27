@@ -4,12 +4,12 @@ from pdx import pdx_metadata
 from pdx.logger import logger
 from pdx.agent import Agent
 from pdx.agent.tester import AgentTestBuilder
-from pdx.settings import Keys, process
+from pdx.settings import process
 from pdx.commands.create import create_agent
 
 
 @click.group()
-@click.version_option(pdx_metadata.version, message=f'\n{click.style("PDX", fg="magenta")} installed version: {click.style("%(version)s", fg="magenta")}\n')
+@click.version_option(pdx_metadata.version, message=f'{click.style("PDX", fg="magenta")} installed version: {click.style("%(version)s", fg="magenta")}')
 @click.pass_context
 def main(ctx):
     ctx.ensure_object(dict)
@@ -32,7 +32,7 @@ def test(ctx, agent_name: str, template: str):
 @main.command("test")
 @click.argument("path", required=True, type=str)
 @click.option('-v', '--verbose', is_flag=True, show_default=True, default=False, help='Enables the logging of all requests and responses to the console.')
-@click.option('--report', is_flag=True, show_default=True, default=False, help='Enables the generation of reports of the tests.')
+@click.option('-r', '--report', is_flag=True, show_default=True, default=False, help='Enables the generation of reports of the tests.')
 @click.pass_context
 def test(ctx, path: str, verbose: bool, report: bool):
 
