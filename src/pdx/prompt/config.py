@@ -1,5 +1,8 @@
+from typing import List
+
+
 class PromptConfig:
-    def __init__(self, config: dict, templates_path: str):
+    def __init__(self, config: List[dict], templates_path: str):
         self.config = config
         self.templates_path = templates_path
         self.prompt_type = None

@@ -43,7 +43,6 @@ class Worker:
         return _worker_response
 
     def execute(self, request: dict = {}, metadata: dict = {}):
-        _prompt_session = PromptSession()
         _prompt_session = self._prompt.execute(request)
         _model_response = self._model.execute(_prompt_session)
         _worker_response = self._postprocess(

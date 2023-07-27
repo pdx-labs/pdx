@@ -1,9 +1,5 @@
 import os
-from pdx import Agent, Completion, Prompt, Model
-Prompt(content, template, role, pointer)
-Model(config)
-Completion(prompt, model)
-Agent(tool=Completion, model=Model)
+from pdx import Agent
 
 
 text_agent = Agent(os.path.dirname(__file__))
@@ -15,4 +11,4 @@ if __name__ == '__main__':
         '1_prompt': {'question': _question}
     })
 
-    print(_response.completion)
+    print(_response.data)

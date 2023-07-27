@@ -32,7 +32,7 @@ class Prompt:
 
         self.role = role
 
-    def execute(self, values: dict = {}, _output_item=False) -> Union[PromptSession, PromptSessionItem]:
+    def execute(self, values: dict = {}, _output_item=False, prompt_session: PromptSession = None) -> Union[PromptSession, PromptSessionItem]:
         _prompt_content = ''
         if isinstance(self._prompt, str):
             _prompt_content = self._prompt
@@ -43,6 +43,8 @@ class Prompt:
 
         if _output_item:
             return PromptSessionItem(content=_prompt_content, role=self.role)
+        elif prompt_session is not None:
+            prompt_session.add(content=_prompt_content, role=self.role)
         else:
             _prompt_session = PromptSession()
             if self.role != 'template':

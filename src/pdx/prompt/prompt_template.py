@@ -60,6 +60,8 @@ class PromptTemplate:
                 self._field_values[key] = str(value)
 
     def execute(self, field_values: dict = {}):
+        if field_values is None:
+            field_values = {}
         _current_field_values = self._field_values
         for key, value in field_values.items():
             if isinstance(value, dict):

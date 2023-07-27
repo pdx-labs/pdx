@@ -1,8 +1,7 @@
 import os
 import click
-from pdx.version import __version__
 from pdx.logger import logger
-from pdx.agent import AgentBuilder
+from pdx.agent import Agent
 from pdx.agent.tester import AgentTestBuilder
 from pdx.settings import Keys, process
 from pdx.commands.create import create_agent
@@ -15,7 +14,7 @@ def main(ctx, version: bool):
     ctx.ensure_object(dict)
 
     if version:
-        click.echo(__version__)
+        click.echo('0.5.0')
 
 
 @main.command("create")
@@ -42,8 +41,7 @@ def test(ctx, path: str, verbose: bool, report: bool):
     if verbose:
         process.verbose = True
 
-    api_keys = Keys()
     agent_path = os.path.join(os.getcwd(), path)
-    _agent = AgentBuilder(agent_path, api_keys)
+    _agent = Agent(agent_path)
     _tester = AgentTestBuilder(agent_path, _agent)
     _tester.execute()
