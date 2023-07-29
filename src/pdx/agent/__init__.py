@@ -8,10 +8,12 @@ from pdx.prompt.prompt_tree import PromptTree
 from pdx.prompt.prompt_session import PromptSession
 from pdx.models.metadata import ModelResponse
 from pdx.agent.metadata import AgentID, RequestMetadata, AgentResponse, AgentResponseMetadata, AgentRequest
+from pdx.cache.cache import Cache
+from pdx.cache import agent_cache, aagent_cache
 
 
 class Agent(object):
-    def __init__(self, path: str = None, prompt: Union[Prompt, PromptChain, PromptTree] = None, model: Model = None):
+    def __init__(self, path: str = None, prompt: Union[Prompt, PromptChain, PromptTree] = None, model: Model = None, cache: Cache = None):
         if path is not None:
             self._type = 'config'
             self._config: AgentConfig = AgentConfig(path)
@@ -35,6 +37,8 @@ class Agent(object):
             self._model = model
             self._agent_id = AgentID()
 
+        self._cache = cache
+
     def _postprocess(self, response: ModelResponse, request: dict, prompt_session: PromptSession) -> AgentResponse:
         request_metadata = RequestMetadata(
             agent_id=self._agent_id,
@@ -53,6 +57,7 @@ class Agent(object):
         )
         return agent_response
 
+    @aagent_cache
     async def aexecute(self, request: AgentRequest = {}, metadata: dict = {}):
         _prompt_session = self._prompt.execute(request)
         _model_response = await self._model.aexecute(_prompt_session)
@@ -61,6 +66,7 @@ class Agent(object):
         _agent_response.metadata.add_custom(metadata=metadata)
         return _agent_response
 
+    @agent_cache
     def execute(self, request: AgentRequest = {}, metadata: dict = {}):
         _prompt_session = self._prompt.execute(request)
         _model_response = self._model.execute(_prompt_session)
