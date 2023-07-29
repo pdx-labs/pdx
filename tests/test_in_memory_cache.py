@@ -1,68 +1,132 @@
 import pytest
-from pydantic import BaseModel
 from pdx.cache.in_memory_cache import InMemoryCache
 from pdx.agent.metadata import AgentResponse
 
 
-# @pytest.fixture
-def config():
-    class TestConfig(BaseModel):
-        test_data: dict = {'data': 'What do you call a dog that does magic tricks? A labracadabrador!',
-                           'metadata': {'custom': {},
-                                        'pdx': {'version': '0.5.0'},
-                                        'request': {'agent_id': {'agent_name': 'agent',
-                                                                 'git_branch': 'add-caching',
-                                                                 'git_hash': 'e549a8020c00ff110a080397bfed10295212ae5e',
-                                                                 'unique_id': '4a01e244-043b-4a76-a2e6-7370a66afbca'},
-                                                    'prompt': [{'content': 'Tell me a joke about dogs.',
-                                                                'role': 'template'}],
-                                                    'request_id': 'd4ebfb91-ff9a-4f17-a121-40ebcf5e1d60',
-                                                    'request_params': {'best_of': 1,
-                                                                       'frequency_penalty': 0,
-                                                                       'max_tokens': 1200,
-                                                                       'model': 'text-davinci-003',
-                                                                       'presence_penalty': 0,
-                                                                       'stop': ['#', '---'],
-                                                                       'temperature': 0,
-                                                                       'top_p': 1},
-                                                    'request_values': {'topic': 'dogs'}},
-                                        'response': {'api_log_id': 'cmpl-7hcL1QiknQ7v4aeVI1pc7lUk7Us8M',
-                                                     'latency': 1.2025699615478516,
-                                                     'model': 'text-davinci-003',
-                                                     'stop': 'stop',
-                                                     'stop_reason': 'stop',
-                                                     'token_usage': {'prompt': 8,
-                                                                     'response': 26,
-                                                                     'total': 34}}}}
-        request_values: dict = {'topic': 'dogs'}
+class TestConfig:
+    test_data_1: dict = {'data': '\n\nQ: What do you call a dog that does magic tricks? \nA: A labracadabrador!',
+                         'metadata': {'custom': {},
+                                      'pdx': {'version': '0.5.1'},
+                                      'request': {'agent_id': {'agent_name': 'agent',
+                                                               'git_branch': 'add-caching',
+                                                               'git_hash': '631bc68b65d55a4f25835e42ffc62cca9a858475',
+                                                               'unique_id': '8d094b03-8542-4e01-bba0-0dc9f8cd805e'},
+                                                  'prompt': [{'content': 'Tell me a joke about dogs.',
+                                                              'role': 'template'}],
+                                                  'request_id': 'ff153a57-db54-46d2-9d64-0ab2727bbe06',
+                                                  'request_params': {'best_of': 1,
+                                                                     'frequency_penalty': 0,
+                                                                     'max_tokens': 1200,
+                                                                     'model': 'text-davinci-003',
+                                                                     'presence_penalty': 0,
+                                                                     'stop': ['#', '---'],
+                                                                     'temperature': 0,
+                                                                     'top_p': 1},
+                                                  'request_values': {'topic': 'dogs'}},
+                                      'response': {'api_log_id': 'cmpl-7hf2k7hCx4fQmC15tN5IpVAjIrWET',
+                                                   'latency': 2.42621111869812,
+                                                   'model': 'text-davinci-003',
+                                                   'stop': 'stop',
+                                                   'stop_reason': 'stop',
+                                                   'token_usage': {'prompt': 8,
+                                                                   'response': 26,
+                                                                   'total': 34}}}}
+    test_data_2: dict = {'data': '\n\nQ: What do cats like to eat for breakfast? \nA: Mice Krispies!',
+                         'metadata': {'custom': {},
+                                      'pdx': {'version': '0.5.1'},
+                                      'request': {'agent_id': {'agent_name': 'agent',
+                                                               'git_branch': 'add-caching',
+                                                               'git_hash': '631bc68b65d55a4f25835e42ffc62cca9a858475',
+                                                               'unique_id': '8d094b03-8542-4e01-bba0-0dc9f8cd805e'},
+                                                  'prompt': [{'content': 'Tell me a joke about cats.',
+                                                              'role': 'template'}],
+                                                  'request_id': 'a873a5a1-541f-4354-8bfc-7a88f1dd6451',
+                                                  'request_params': {'best_of': 1,
+                                                                     'frequency_penalty': 0,
+                                                                     'max_tokens': 1200,
+                                                                     'model': 'text-davinci-003',
+                                                                     'presence_penalty': 0,
+                                                                     'stop': ['#', '---'],
+                                                                     'temperature': 0,
+                                                                     'top_p': 1},
+                                                  'request_values': {'topic': 'cats'}},
+                                      'response': {'api_log_id': 'cmpl-7hf2l4AWOnjfTLk50WyFYQj8t7DhH',
+                                                   'latency': 1.1315219402313232,
+                                                   'model': 'text-davinci-003',
+                                                   'stop': 'stop',
+                                                   'stop_reason': 'stop',
+                                                   'token_usage': {'prompt': 8,
+                                                                   'response': 23,
+                                                                   'total': 31}}}}
+    request_values: dict = {'topic': 'dogs'}
 
+
+@pytest.fixture
+def config():
     return TestConfig()
 
 
-# def test_one(request, config):
+@pytest.fixture
+def cache(config: TestConfig):
+    _in_memory_cache = InMemoryCache()
 
-#     assert config.input_value == "Input Value"
+    agent_response_1 = AgentResponse(**config.test_data_1)
+    agent_response_2 = AgentResponse(**config.test_data_2)
 
-#     request.config.cache.set('values', {
-#         'input_value': 'Input Value',
-#         'output_value': 'Output Value'
-#     })
+    _in_memory_cache.update(
+        agent_id=agent_response_1.metadata.request.agent_id,
+        agent_request=agent_response_1.metadata.request.request_values,
+        agent_response=agent_response_1
+    )
+
+    _in_memory_cache.update(
+        agent_id=agent_response_2.metadata.request.agent_id,
+        agent_request=agent_response_2.metadata.request.request_values,
+        agent_response=agent_response_2
+    )
+    return _in_memory_cache
 
 
-# def test_two(request, config):
+def test_cache_initialization(request, config):
 
-#     assert config.output_value == "Output Value"
+    cache = InMemoryCache()
 
-#     values = request.config.cache.get('values', None)
-#     assert values != None
-#     data = {
-#         'input_value': config.input_value,
-#         'output_value': config.output_value
-#     }
-#     assert values == data
+    assert isinstance(cache, InMemoryCache)
+    assert isinstance(cache._cache, dict)
+    assert cache._cache == {}
 
-if __name__ == '__main__':
-    agent_response = AgentResponse(**config().test_data)
-    print(type(agent_response))
-    print(repr(agent_response))
-    print(agent_response.model_dump(mode='json'))
+
+def test_cache_update(request, config: TestConfig, cache: InMemoryCache):
+    assert cache._cache != {}
+    assert len(cache._cache) == 2
+
+
+def test_cache_lookup(request, config: TestConfig, cache: InMemoryCache):
+    agent_response_1 = AgentResponse(**config.test_data_1)
+    _request_1_values = agent_response_1.metadata.request.request_values
+    _request_1_agent_id = agent_response_1.metadata.request.agent_id
+    _agent_response_1_values = agent_response_1.model_dump(mode='json')
+
+    agent_response_2 = AgentResponse(**config.test_data_2)
+    _request_2_values = agent_response_2.metadata.request.request_values
+    _request_2_agent_id = agent_response_2.metadata.request.agent_id
+    _agent_response_2_values = agent_response_2.model_dump(mode='json')
+
+    _request_1_loop_up = cache.lookup(
+        agent_id=_request_1_agent_id,
+        agent_request=_request_1_values)
+
+    _request_2_loop_up = cache.lookup(
+        agent_id=_request_2_agent_id,
+        agent_request=_request_2_values)
+
+    assert cache._cache != {}
+    assert len(cache._cache) == 2
+
+    assert _request_1_loop_up == agent_response_1
+    assert _request_1_loop_up.model_dump(
+        mode='json') == _agent_response_1_values
+
+    assert _request_2_loop_up == agent_response_2
+    assert _request_2_loop_up.model_dump(
+        mode='json') == _agent_response_2_values

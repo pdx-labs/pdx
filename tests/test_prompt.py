@@ -1,40 +1,41 @@
 import os
 import pytest
 from pydantic import BaseModel
-from pdx.prompt import Prompt, PromptTemplate
+from pdx.prompt import Prompt
 
 
 ASSETS_PATH = os.path.join(os.path.dirname(__file__), "assets")
 
 
+class TestConfig(BaseModel):
+    basic_prompt: str = "What are the uses of Glucose?"
+    template: str = "What are the uses of {{compound}}?"
+    template_path: str = f"{ASSETS_PATH}/prompt_template.jinja"
+    pointer: str = "1_prompt"
+    template_context: dict = {"compound": "Glucose"}
+    prompt_output: str = "What are the uses of Glucose?"
+
+
 @pytest.fixture
 def config():
-    class TestConfig(BaseModel):
-        basic_prompt: str = "What are the uses of Glucose?"
-        template: str = "What are the uses of {{compound}}?"
-        template_path: str = f"{ASSETS_PATH}/prompt_template.jinja"
-        pointer: str = "1_prompt"
-        template_context: dict = {"compound": "Glucose"}
-        prompt_output: str = "What are the uses of Glucose?"
-
     return TestConfig()
 
 
-def test_basic_prompt(config):
+def test_basic_prompt(config: TestConfig):
 
     prompt = Prompt(content=config.basic_prompt)
     _response = prompt.execute()
     assert _response == config.prompt_output
 
 
-def test_template_prompt(config):
+def test_template_prompt(config: TestConfig):
 
     prompt = Prompt(template=config.template, pointer=config.pointer)
     _response = prompt.execute(config.template_context)
     assert _response == config.prompt_output
 
 
-def test_template_path_prompt(config):
+def test_template_path_prompt(config: TestConfig):
 
     prompt = Prompt(template_path=config.template_path, pointer=config.pointer)
     _response = prompt.execute(config.template_context)
