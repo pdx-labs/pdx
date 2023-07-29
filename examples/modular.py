@@ -1,12 +1,12 @@
+import os
 from pprint import pprint
-from dataclasses import asdict
 from pdx import Agent, Worker, Prompt
 from pdx.prompt.prompt_chain import PromptChain
 from pdx.models.openai import CompletionModel as OpenAICompletioModel
 from pdx.models.anthropic import CompletionModel as AnthropicCompletionModel
-from pdx.models.config import Keys
 
-keys = Keys()
+openai_key = os.environ.get('OPENAI_KEY')
+anthropic_key = os.environ.get('ANTHROPIC_KEY')
 
 prompt_1 = Prompt("Complete this sentence: ")
 
@@ -16,10 +16,9 @@ prompt_2_user = Prompt(template="Based on your role, answer my question in steps
                        role="user", pointer="user_0")
 prompt_chain = PromptChain([prompt_2_system, prompt_2_user])
 
-openai_completions = OpenAICompletioModel(
-    api_key=keys.openai_key, model='text-davinci-003')
+openai_completions = OpenAICompletioModel(openai_key, model='text-davinci-003')
 anthropic_completions = AnthropicCompletionModel(
-    api_key=keys.anthropic_key, model='claude-v1')
+    anthropic_key, model='claude-v1')
 
 
 if __name__ == '__main__':
@@ -40,4 +39,3 @@ if __name__ == '__main__':
         'user_0': {'question': _question},
     })
     pprint(_r.data)
-    pprint(asdict(_r))

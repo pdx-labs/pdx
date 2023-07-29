@@ -7,7 +7,7 @@ from pdx.prompt.prompt_chain import PromptChain
 from pdx.prompt.prompt_tree import PromptTree
 from pdx.prompt.prompt_session import PromptSession
 from pdx.models.metadata import ModelResponse
-from pdx.agent.metadata import AgentID, RequestMetadata, AgentResponse, AgentResponseMetadata
+from pdx.agent.metadata import AgentID, RequestMetadata, AgentResponse, AgentResponseMetadata, AgentRequest
 
 
 class Agent(object):
@@ -33,7 +33,7 @@ class Agent(object):
             self._type = 'prompt-model'
             self._prompt = prompt
             self._model = model
-            self._agent_id = AgentID(agent_name='agent')
+            self._agent_id = AgentID()
 
     def _postprocess(self, response: ModelResponse, request: dict, prompt_session: PromptSession) -> AgentResponse:
         request_metadata = RequestMetadata(
@@ -53,7 +53,7 @@ class Agent(object):
         )
         return agent_response
 
-    async def aexecute(self, request: dict = {}, metadata: dict = {}):
+    async def aexecute(self, request: AgentRequest = {}, metadata: dict = {}):
         _prompt_session = self._prompt.execute(request)
         _model_response = await self._model.aexecute(_prompt_session)
         _agent_response = self._postprocess(
@@ -61,7 +61,7 @@ class Agent(object):
         _agent_response.metadata.add_custom(metadata=metadata)
         return _agent_response
 
-    def execute(self, request: dict = {}, metadata: dict = {}):
+    def execute(self, request: AgentRequest = {}, metadata: dict = {}):
         _prompt_session = self._prompt.execute(request)
         _model_response = self._model.execute(_prompt_session)
         _agent_response = self._postprocess(
