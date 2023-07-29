@@ -20,14 +20,10 @@ class Prompt:
         elif template != None:
             self._prompt = PromptTemplate(
                 template_string=template, name=pointer)
-            if pointer == None:
-                raise Exception('Prompt template must have a pointer.')
             self.pointer = pointer
         elif template_path != None:
             self._prompt = PromptTemplate(
                 template_path=template_path, name=pointer)
-            if pointer == None:
-                raise Exception('Prompt template must have a pointer.')
             self.pointer = pointer
 
         self.role = role

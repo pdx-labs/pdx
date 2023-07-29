@@ -14,6 +14,6 @@ process.verbose = True
 
 if __name__ == '__main__':
     _r = completion_agent.execute(test_case)
-    pprint(_r)
-    pprint(repr(_r))
+    # pprint(_r)
+    # pprint(repr(_r))
     pprint(_r.model_dump())
