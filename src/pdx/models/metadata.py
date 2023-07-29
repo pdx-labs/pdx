@@ -1,25 +1,23 @@
-from dataclasses import dataclass
+from typing import Optional
+from pydantic import BaseModel, Field
 
 
-@dataclass
-class ModelTokenUsage:
-    response: int = None
-    prompt: int = None
-    total: int = None
+class ModelTokenUsage(BaseModel):
+    response: Optional[int] = Field(default=None)
+    prompt: Optional[int] = Field(default=None)
+    total: Optional[int] = Field(default=None)
 
 
-@dataclass
-class ResponseMetadata:
+class ResponseMetadata(BaseModel):
     model: str
-    api_log_id: str = None
-    stop: str = None
-    stop_reason: str = None
-    token_usage: ModelTokenUsage = None
-    latency: float = None
+    api_log_id: Optional[str] = Field(default=None)
+    stop: Optional[str] = Field(default=None)
+    stop_reason: Optional[str] = Field(default=None)
+    token_usage: Optional[ModelTokenUsage] = Field(default=None)
+    latency: Optional[float] = Field(default=None)
 
-@dataclass
-class ModelResponse:
-    metadata: ResponseMetadata = None
-    request_params: dict = None
-    data: str = None
-    
+
+class ModelResponse(BaseModel):
+    metadata: Optional[ResponseMetadata] = Field(default=None)
+    request_params: Optional[dict] = Field(default=None)
+    data: Optional[str] = Field(default=None)

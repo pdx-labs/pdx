@@ -1,4 +1,4 @@
-from pydantic import BaseSettings, BaseModel
+from pydantic import BaseModel
 
 
 class Process(BaseModel):

@@ -8,7 +8,7 @@ from pdx.models.anthropic.exceptions import handle_anthropic_prompt_validation
 from pdx.models.metadata import ModelResponse, ResponseMetadata, ModelTokenUsage
 
 
-class CompletionModel(object):
+class CompletionModel(Model):
     def __init__(self,
                  api_key: str,
                  model: str,
@@ -74,47 +74,3 @@ class CompletionModel(object):
             data=response['completion'])
 
         return model_response
-
-    def execute(self, prompt: PromptSession) -> ModelResponse:
-        start_time = time()
-        request_params = self._preprocess(prompt)
-
-        _try_count = 0
-        while (_try_count <= self._retries):
-            try:
-                _r = self._client.request(
-                    "post",
-                    self._api_url,
-                    params=request_params,
-                )
-                request_time = time() - start_time
-                return self._postprocess(_r, request_params, request_time)
-            except Exception as e:
-                logger.verbose(
-                    f"{self._provider} {self._model} model failed to run.\nReason: {e}")
-                _try_count += 1
-
-        raise ValueError(
-            f"{self._provider} {self._model} model failed to run successfully.")
-
-    async def aexecute(self, prompt: PromptSession) -> ModelResponse:
-        start_time = time()
-        request_params = self._preprocess(prompt)
-
-        _try_count = 0
-        while (_try_count <= self._retries):
-            try:
-                _r = await self._client.arequest(
-                    "post",
-                    self._api_url,
-                    params=request_params,
-                )
-                request_time = time() - start_time
-                return self._postprocess(_r, request_params, request_time)
-            except Exception as e:
-                logger.verbose(
-                    f"{self._provider} {self._model} model failed to run.\nReason: {e}")
-                _try_count += 1
-
-        raise ValueError(
-            f"{self._provider} {self._model} model failed to run successfully.")

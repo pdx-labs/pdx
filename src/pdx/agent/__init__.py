@@ -7,11 +7,13 @@ from pdx.prompt.prompt_chain import PromptChain
 from pdx.prompt.prompt_tree import PromptTree
 from pdx.prompt.prompt_session import PromptSession
 from pdx.models.metadata import ModelResponse
-from pdx.agent.metadata import AgentID, RequestMetadata, AgentResponse, AgentResponseMetadata
+from pdx.agent.metadata import AgentID, RequestMetadata, AgentResponse, AgentResponseMetadata, AgentRequest
+from pdx.cache.cache import Cache
+from pdx.cache import agent_cache, aagent_cache
 
 
 class Agent(object):
-    def __init__(self, path: str = None, prompt: Union[Prompt, PromptChain, PromptTree] = None, model: Model = None):
+    def __init__(self, path: str = None, prompt: Union[Prompt, PromptChain, PromptTree] = None, model: Model = None, cache: Cache = None):
         if path is not None:
             self._type = 'config'
             self._config: AgentConfig = AgentConfig(path)
@@ -33,7 +35,9 @@ class Agent(object):
             self._type = 'prompt-model'
             self._prompt = prompt
             self._model = model
-            self._agent_id = AgentID(agent_name='agent')
+            self._agent_id = AgentID()
+
+        self._cache = cache
 
     def _postprocess(self, response: ModelResponse, request: dict, prompt_session: PromptSession) -> AgentResponse:
         request_metadata = RequestMetadata(
@@ -53,7 +57,8 @@ class Agent(object):
         )
         return agent_response
 
-    async def aexecute(self, request: dict = {}, metadata: dict = {}):
+    @aagent_cache
+    async def aexecute(self, request: AgentRequest = {}, metadata: dict = {}):
         _prompt_session = self._prompt.execute(request)
         _model_response = await self._model.aexecute(_prompt_session)
         _agent_response = self._postprocess(
@@ -61,7 +66,8 @@ class Agent(object):
         _agent_response.metadata.add_custom(metadata=metadata)
         return _agent_response
 
-    def execute(self, request: dict = {}, metadata: dict = {}):
+    @agent_cache
+    def execute(self, request: AgentRequest = {}, metadata: dict = {}):
         _prompt_session = self._prompt.execute(request)
         _model_response = self._model.execute(_prompt_session)
         _agent_response = self._postprocess(

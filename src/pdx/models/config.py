@@ -1,5 +1,6 @@
-from pydantic import BaseSettings
-from dataclasses import dataclass, field
+import os
+from typing import Optional
+from pydantic import BaseModel, Field
 
 # Available LLM completion models
 OPENAI_COMPLETION_MODELS = ["text-davinci-003", "gpt-3.5-turbo", "gpt-4"]
@@ -8,21 +9,14 @@ ANTHROPIC_COMPLETION_MODELS = ["claude-v1", "claude-v1-100k", "claude-instant-v1
                                "claude-instant-v1.1-100k", "claude-instant-v1.0"]
 
 
-class Keys(BaseSettings):
-    openai_key: str = None
-    anthropic_key: str = None
-    cohere_key: str = None
-
-
-@dataclass
-class ModelConfig:
+class ModelConfig(BaseModel):
     id: str
-    params: dict = field(default_factory=dict)
-    name: str = field(init=False)
-    provider: str = field(init=False)
-    api_key: str = field(init=False)
+    params: dict = Field(default_factory=dict)
+    name: Optional[str] = Field(default=None)
+    provider: Optional[str] = Field(default=None)
+    api_key: Optional[str] = Field(default=None)
 
-    def __post_init__(self):
+    def model_post_init(self, *args, **kwargs) -> None:
         self.name = self.id
 
         if self.id in [*OPENAI_COMPLETION_MODELS]:
@@ -38,12 +32,11 @@ class ModelConfig:
 
     @staticmethod
     def _get_api_key(api_key_id: str):
-        _keys = Keys()
-        _api_key = _keys.__dict__.get(api_key_id, None)
+        _api_key = os.environ[api_key_id.upper()]
 
         if _api_key is None:
             raise ValueError(
-                f"{api_key_id.capitalize()} API key not found. Make sure it is present as a environment variable.")
+                f"{api_key_id.upper()} API key not found. Make sure it is present as an environment variable.")
 
         return _api_key
 

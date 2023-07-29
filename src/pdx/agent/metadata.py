@@ -1,18 +1,21 @@
 import uuid
 import subprocess
-from dataclasses import dataclass, field
+from typing import Union, Optional
+from pydantic import BaseModel, Field
 from pdx.metadata import PDXMetadata
 from pdx.models.metadata import ResponseMetadata
 from pdx.logger import logger
 
+AgentRequest = Union[dict, str]
 
-@dataclass
-class AgentID:
-    agent_name: str
-    git_hash: str = None
-    git_branch: str = None
 
-    def __post_init__(self):
+class AgentID(BaseModel):
+    agent_name: str = Field(default='agent')
+    unique_id: uuid.UUID = Field(default_factory=lambda: uuid.uuid4())
+    git_hash: Optional[str] = Field(default=None)
+    git_branch: Optional[str] = Field(default=None)
+
+    def model_post_init(self, *args, **kwargs) -> None:
         if self.git_hash is None and self.git_branch is None:
             try:
                 subprocess.check_output(
@@ -30,35 +33,24 @@ class AgentID:
                 self.git_branch = 'not-git-repo'
 
 
-@dataclass
-class RequestMetadata:
+class RequestMetadata(BaseModel):
     agent_id: AgentID
-    request_id: uuid.UUID = None
-    request_values: dict = None
-    request_params: dict = None
-    prompt: list = None
-
-    def __post_init__(self):
-        if self.request_id is None:
-            self.request_id = uuid.uuid4()
+    request_id: uuid.UUID = Field(default_factory=lambda: uuid.uuid4())
+    request_values: dict
+    request_params: dict
+    prompt: list
 
 
-@dataclass
-class AgentResponseMetadata:
+class AgentResponseMetadata(BaseModel):
     request: RequestMetadata
     response: ResponseMetadata
-    custom: dict = None
-    pdx: PDXMetadata = None
-
-    def __post_init__(self):
-        if self.pdx is None:
-            self.pdx = PDXMetadata()
+    pdx: PDXMetadata = Field(default_factory=lambda: PDXMetadata())
+    custom: Optional[dict] = None
 
     def add_custom(self, metadata: dict):
         self.custom = metadata
 
 
-@dataclass
-class AgentResponse:
+class AgentResponse(BaseModel):
     data: str
     metadata: AgentResponseMetadata

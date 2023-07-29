@@ -5,6 +5,12 @@ from pdx.prompt.prompt_session import PromptSession, PromptSessionItem
 
 class PromptChain:
     def __init__(self, prompts: List[Prompt] = None):
+        for _prompt in prompts:
+            if _prompt.pointer == None:
+                raise ValueError(
+                    'Prompt Pointer missing.'
+                    'PromptChain must be initialized with a list of Prompt objects that have a unique `pointer` property.'
+                )
         self._chain = prompts
 
     def execute(self, values: dict = {}):

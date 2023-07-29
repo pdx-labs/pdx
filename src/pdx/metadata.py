@@ -1,6 +1,5 @@
-from dataclasses import dataclass
+from pydantic import BaseModel
 
 
-@dataclass
-class PDXMetadata:
-    version: str = '0.5.0'
+class PDXMetadata(BaseModel):
+    version: str = '0.5.1'

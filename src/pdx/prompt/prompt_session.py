@@ -1,15 +1,11 @@
-from dataclasses import dataclass
-from typing import List, Union, Dict
-# from pdx.prompt import Prompt
-# from pdx.prompt.prompt_chain import PromptChain
-# from pdx.prompt.prompt_tree import PromptTree
+from typing import List, Union, Dict, Optional
+from pydantic import BaseModel, Field
 
 
-@dataclass
-class PromptSessionItem:
+class PromptSessionItem(BaseModel):
     content: str
-    content_type: str = 'text'
-    role: str = None
+    content_type: str = Field(default='text')
+    role: Optional[str] = Field(default=None)
 
 
 class PromptSession:
