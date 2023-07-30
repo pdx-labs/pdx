@@ -2,4 +2,4 @@ from pydantic import BaseModel
 
 
 class PDXMetadata(BaseModel):
-    version: str = '0.5.1'
+    version: str = '0.6.0'
