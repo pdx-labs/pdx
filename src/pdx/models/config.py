@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 # Available LLM completion models
 OPENAI_COMPLETION_MODELS = ["text-davinci-003", "gpt-3.5-turbo", "gpt-4"]
-ANTHROPIC_COMPLETION_MODELS = ["claude-v1", "claude-v1-100k", "claude-instant-v1", "claude-instant-v1-100k",
+ANTHROPIC_COMPLETION_MODELS = ["claude-2", "claude-2.0", "claude-v1", "claude-v1-100k", "claude-instant-v1", "claude-instant-v1-100k",
                                "claude-v1.3", "claude-v1.3-100k", "claude-v1.2" "claude-v1.0", "claude-instant-v1.1",
                                "claude-instant-v1.1-100k", "claude-instant-v1.0"]
 COHERE_COMPLETION_MODELS = ["command", "command-nightly", "command-light",
