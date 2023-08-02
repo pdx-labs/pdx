@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Any
 from pydantic import BaseModel, Field
 
 
@@ -13,6 +13,7 @@ class ResponseMetadata(BaseModel):
     api_log_id: Optional[str] = Field(default=None)
     stop: Optional[str] = Field(default=None)
     stop_reason: Optional[str] = Field(default=None)
+    warnings: Optional[Any] = Field(default=None)
     token_usage: Optional[ModelTokenUsage] = Field(default=None)
     latency: Optional[float] = Field(default=None)
 
