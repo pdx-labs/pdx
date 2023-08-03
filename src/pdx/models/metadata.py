@@ -1,4 +1,4 @@
-from typing import Optional, Any
+from typing import Optional, Any, Union, List
 from pydantic import BaseModel, Field
 
 
@@ -14,11 +14,12 @@ class ResponseMetadata(BaseModel):
     stop: Optional[str] = Field(default=None)
     stop_reason: Optional[str] = Field(default=None)
     warnings: Optional[Any] = Field(default=None)
-    token_usage: Optional[ModelTokenUsage] = Field(default=None)
+    token_usage: Optional[ModelTokenUsage] = Field(default=ModelTokenUsage())
     latency: Optional[float] = Field(default=None)
 
 
 class ModelResponse(BaseModel):
     metadata: Optional[ResponseMetadata] = Field(default=None)
     request_params: Optional[dict] = Field(default=None)
-    data: Optional[str] = Field(default=None)
+    data_type: str = Field(default='text')
+    data: Union[Any, str, list, bytes, List[bytes]]

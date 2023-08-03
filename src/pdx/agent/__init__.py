@@ -53,6 +53,7 @@ class Agent(object):
         )
         agent_response = AgentResponse(
             data=response.data,
+            data_type=response.data_type,
             metadata=metadata
         )
         return agent_response
