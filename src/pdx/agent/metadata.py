@@ -1,6 +1,6 @@
 import uuid
 import subprocess
-from typing import Union, Optional
+from typing import Union, Optional, Any, List
 from pydantic import BaseModel, Field
 from pdx.metadata import PDXMetadata
 from pdx.models.metadata import ResponseMetadata
@@ -52,5 +52,6 @@ class AgentResponseMetadata(BaseModel):
 
 
 class AgentResponse(BaseModel):
-    data: str
     metadata: AgentResponseMetadata
+    data_type: str = Field(default='text')
+    data: Union[Any, str, list, bytes, List[bytes]]
