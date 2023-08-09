@@ -1,4 +1,4 @@
-from time import time
+import json
 from pdx.logger import logger
 from pdx.models.model import Model
 from pdx.prompt.prompt_session import PromptSession
@@ -70,9 +70,8 @@ class GenerationModel(Model):
         return request_params
 
     def _postprocess(self, response: dict, request_params: dict, request_time) -> ModelResponse:
-
-        params = {key: value for key,
-                  value in request_params.items() if key != 'prompt'}
+        _prompt = request_params.pop('prompt', None)
+        _r = json.loads(response)
 
         token_usage = ModelTokenUsage(
             response=None,
@@ -80,13 +79,13 @@ class GenerationModel(Model):
             total=None)
         response_metadata = ResponseMetadata(
             model=request_params['model'],
-            api_log_id=response['id'],
-            warnings=response['meta'].get('warnings', None),
+            api_log_id=_r['id'],
+            warnings=_r['meta'].get('warnings', None),
             token_usage=token_usage,
             latency=request_time)
         model_response = ModelResponse(
             metadata=response_metadata,
-            request_params=params,
-            data=response['generations'][0]['text'])
+            request_params=request_params,
+            data=_r['generations'][0]['text'])
 
         return model_response

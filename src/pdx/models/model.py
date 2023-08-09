@@ -64,20 +64,23 @@ class Model:
     def execute(self, prompt: PromptSession) -> ModelResponse:
         start_time = time()
         request_params = self._preprocess(prompt)
-
+        _files = request_params.pop('files', None)
+        _retry_error_log = []
         _try_count = 0
         while (_try_count <= self._retries):
             try:
                 _r = self._client.request(
-                    "post",
-                    self._api_url,
+                    method="post",
+                    path=self._api_url,
                     params=request_params,
+                    files=_files
                 )
                 request_time = time() - start_time
                 return self._postprocess(_r, request_params, request_time)
             except Exception as e:
                 logger.verbose(
                     f"{self._provider} {self._model} model failed to run.\nReason: {e}")
+                _retry_error_log.append(e)
                 _try_count += 1
 
         raise ValueError(
@@ -86,20 +89,23 @@ class Model:
     async def aexecute(self, prompt: PromptSession) -> ModelResponse:
         start_time = time()
         request_params = self._preprocess(prompt)
-
+        _files = request_params.pop('files', None)
+        _retry_error_log = []
         _try_count = 0
         while (_try_count <= self._retries):
             try:
                 _r = await self._client.arequest(
-                    "post",
-                    self._api_url,
+                    method="post",
+                    path=self._api_url,
                     params=request_params,
+                    files=_files
                 )
                 request_time = time() - start_time
                 return self._postprocess(_r, request_params, request_time)
             except Exception as e:
                 logger.verbose(
                     f"{self._provider} {self._model} model failed to run.\nReason: {e}")
+                _retry_error_log.append(e)
                 _try_count += 1
 
         raise ValueError(

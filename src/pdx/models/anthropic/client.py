@@ -54,6 +54,7 @@ class AnthropicClient(APIClient):
         params: dict,
         path: str,
         request_timeout: Optional[Union[float, Tuple[float, float]]],
+        files: dict = None,
     ) -> APIRequest:
         method = method.lower()
         abs_url = urllib.parse.urljoin(self.api_url, path)
@@ -84,6 +85,7 @@ class AnthropicClient(APIClient):
             abs_url,
             final_headers,
             data,
+            files,
             stream,
             request_timeout or self.request_timeout,
         )

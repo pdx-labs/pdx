@@ -1,4 +1,4 @@
-from time import time
+import json
 from pdx.logger import logger
 from pdx.models.model import Model
 from pdx.prompt.prompt_session import PromptSession
@@ -68,32 +68,32 @@ class CompletionModel(Model):
         return request_params
 
     def _postprocess(self, response: dict, request_params: dict, request_time: float) -> ModelResponse:
+        _r = json.loads(response)
+
         token_usage = ModelTokenUsage(
-            response=response['usage']['completion_tokens'],
-            prompt=response['usage']['prompt_tokens'],
-            total=response['usage']['total_tokens'])
+            response=_r['usage']['completion_tokens'],
+            prompt=_r['usage']['prompt_tokens'],
+            total=_r['usage']['total_tokens'])
         response_metadata = ResponseMetadata(
-            model=response['model'],
-            api_log_id=response['id'],
-            stop=response['choices'][0]['finish_reason'],
-            stop_reason=response['choices'][0]['finish_reason'],
+            model=_r['model'],
+            api_log_id=_r['id'],
+            stop=_r['choices'][0]['finish_reason'],
+            stop_reason=_r['choices'][0]['finish_reason'],
             token_usage=token_usage,
             latency=request_time)
 
         if self._client_type == "chat":
-            params = {key: value for key,
-                      value in request_params.items() if key != 'messages'}
+            _messages = request_params.pop('messages', None)
             model_response = ModelResponse(
                 metadata=response_metadata,
-                request_params=params,
-                data=response['choices'][0]['message']['content'])
+                request_params=request_params,
+                data=_r['choices'][0]['message']['content'])
             return model_response
 
         if self._client_type == "text":
-            params = {key: value for key,
-                      value in request_params.items() if key != 'prompt'}
+            _prompt = request_params.pop('prompt', None)
             model_response = ModelResponse(
                 metadata=response_metadata,
-                request_params=params,
-                data=response['choices'][0]['text'])
+                request_params=request_params,
+                data=_r['choices'][0]['text'])
             return model_response

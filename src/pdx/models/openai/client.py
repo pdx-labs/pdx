@@ -28,11 +28,11 @@ class OpenAIClient(APIClient):
         params: dict,
         path: str,
         request_timeout: Optional[Union[float, Tuple[float, float]]],
+        files: dict = None,
     ) -> APIRequest:
         method = method.lower()
         abs_url = urllib.parse.urljoin(self.api_url, path)
         final_headers: dict[str, str] = {
-            "Content-Type": "application/json",
             "Authorization": f"Bearer {self.api_key}",
             **(headers or {}),
         }
@@ -40,7 +40,11 @@ class OpenAIClient(APIClient):
         data = None
         if params:
             if method in {"post"}:
-                data = json.dumps(params).encode()
+                if files is not None:
+                    data = params
+                else:
+                    data = json.dumps(params).encode()
+                    final_headers["Content-Type"] = "application/json"
             else:
                 raise ValueError(f"Unrecognized method: {method}")
 
@@ -51,6 +55,7 @@ class OpenAIClient(APIClient):
             abs_url,
             final_headers,
             data,
+            files,
             stream,
             request_timeout or self.request_timeout,
         )

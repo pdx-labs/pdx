@@ -1,9 +1,8 @@
 import os
 import pytest
 from pdx import Agent, Prompt
-from pdx.agent.metadata import AgentID, AgentResponse
+from pdx.agent.metadata import AgentResponse
 from pdx.models.metadata import ModelResponse
-from pdx.models.openai.completion import CompletionModel
 from pdx.models.openai.image.generation import ImageGenerationModel
 
 
@@ -38,6 +37,21 @@ def test_execute(request, config: TestConfig):
 
 def test_agent_execute(request, config: TestConfig):
     _response = config.agent.execute(config.request_values)
+    assert isinstance(_response, AgentResponse)
+    assert isinstance(_response.data, bytes)
+
+
+@pytest.mark.asyncio
+async def test_async_execute(request, config: TestConfig):
+    _prompt_session = config.prompt.execute(config.request_values)
+    _response = await config.model.aexecute(_prompt_session)
+    assert isinstance(_response, ModelResponse)
+    assert isinstance(_response.data, bytes)
+
+
+@pytest.mark.asyncio
+async def test_async_agent_execute(request, config: TestConfig):
+    _response = await config.agent.aexecute(config.request_values)
     assert isinstance(_response, AgentResponse)
     assert isinstance(_response.data, bytes)
 

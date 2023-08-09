@@ -1,4 +1,4 @@
-from time import time
+import json
 from pdx.logger import logger
 from pdx.models.model import Model
 from pdx.prompt.prompt_session import PromptSession
@@ -55,22 +55,23 @@ class CompletionModel(Model):
         return request_params
 
     def _postprocess(self, response: dict, request_params: dict, request_time) -> ModelResponse:
-        params = {key: value for key,
-                  value in request_params.items() if key != 'prompt'}
+        _prompt = request_params.pop('prompt', None)
+
+        _r = json.loads(response)
         token_usage = ModelTokenUsage(
             response=None,
             prompt=None,
             total=None)
         response_metadata = ResponseMetadata(
-            model=response['model'],
-            api_log_id=response['log_id'],
-            stop=response['stop'],
-            stop_reason=response['stop'],
+            model=_r['model'],
+            api_log_id=_r['log_id'],
+            stop=_r['stop'],
+            stop_reason=_r['stop'],
             token_usage=token_usage,
             latency=request_time)
         model_response = ModelResponse(
             metadata=response_metadata,
-            request_params=params,
-            data=response['completion'])
+            request_params=request_params,
+            data=_r['completion'])
 
         return model_response
