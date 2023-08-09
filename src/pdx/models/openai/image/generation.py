@@ -1,4 +1,4 @@
-from time import time
+import json
 from pdx.logger import logger
 from pdx.models.model import Model
 from pdx.prompt.prompt_session import PromptSession
@@ -39,12 +39,12 @@ class ImageGenerationModel(Model):
         return request_params
 
     def _postprocess(self, response: dict, request_params: dict, request_time: float) -> ModelResponse:
-        params = {key: value for key,
-                  value in request_params.items() if key != 'prompt'}
+        _prompt = request_params.pop('prompt', None)
+        _r = json.loads(response)
 
         response_metadata = ResponseMetadata(
             model='dall-e',
-            api_log_id=f"{response['created']}",
+            api_log_id=f"{_r['created']}",
             stop='generation_completed',
             stop_reason='generation_completed',
             latency=request_time)
@@ -52,21 +52,21 @@ class ImageGenerationModel(Model):
         _response_data = ['data']
         if len(_response_data) == 1:
             _data = format_response(
-                response['data'][0][params['response_format']],
-                params['response_format'],
+                _r['data'][0][request_params['response_format']],
+                request_params['response_format'],
                 self._decode_response
             )
         elif len(_response_data) > 1:
             _data = [format_response(
-                _d[params['response_format']],
-                params['response_format'],
+                _d[request_params['response_format']],
+                request_params['response_format'],
                 self._decode_response
             )
-                for _d in response['data']]
+                for _d in _r['data']]
 
-        if params['response_format'] == 'b64_json':
+        if request_params['response_format'] == 'b64_json':
             _data_type_prefix = 'bytes'
-        elif params['response_format'] == 'url':
+        elif request_params['response_format'] == 'url':
             _data_type_prefix = 'url'
         else:
             _data_type_prefix = 'string'
@@ -79,7 +79,7 @@ class ImageGenerationModel(Model):
 
         model_response = ModelResponse(
             metadata=response_metadata,
-            request_params=params,
+            request_params=request_params,
             data=_data,
             data_type=_data_type
         )
