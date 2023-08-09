@@ -87,4 +87,4 @@ def test_prompt_chain_multimodal(config: TestConfig):
     assert isinstance(
         _response.multimodal_items['audio'][0], PromptSessionItem)
     assert isinstance(_response.text_prompt({}), str)
-    assert isinstance(_response.audio_prompt(), bytes)
+    assert isinstance(_response.audio_prompt(), tuple)

@@ -1,20 +1,61 @@
 import os
-from pdx import Prompt, PromptChain
+import pytest
+from pdx import Agent, Prompt, PromptChain
+from pdx.agent.metadata import AgentResponse
+from pdx.models.metadata import ModelResponse
 from pdx.models.openai.audio.transcription import AudioTranscriptionModel
 
-file_name = 'test_prompt_chain_multimodal.wav'
-assets_folder = os.path.join(os.path.dirname(
+ASSETS_FOLDER = os.path.join(os.path.dirname(
     os.path.dirname(os.path.dirname(__file__))), 'assets')
-file = os.path.join(assets_folder, file_name)
+FILE_NAME = 'test_prompt_chain_multimodal.wav'
+FILE_PATH = os.path.join(ASSETS_FOLDER, FILE_NAME)
 
 
-if __name__ == '__main__':
-
-    audio_prompt = Prompt(file=file)
-    ai_prompt = Prompt('the content is in english with an indian accent.')
-    prompt_chain = PromptChain(prompts=[audio_prompt, ai_prompt])
-
+class TestConfig():
     openai_key = os.environ['OPENAI_API_KEY']
-    model = AudioTranscriptionModel(api_key=openai_key)
-    _ps = prompt_chain.execute()
-    _r = model.execute(_ps)
+    prompt: PromptChain = None
+    model: AudioTranscriptionModel = None
+    agent: Agent = None
+
+
+@pytest.fixture
+def config():
+    _config = TestConfig()
+    audio_prompt = Prompt(file=FILE_PATH)
+    ai_prompt = Prompt('The content is in English.')
+    _config.prompt = PromptChain(prompts=[audio_prompt, ai_prompt])
+    _config.model = AudioTranscriptionModel(
+        api_key=_config.openai_key,
+        response_format='json'
+    )
+    _config.agent = Agent(prompt=_config.prompt, model=_config.model)
+
+    return _config
+
+
+def test_execute(request, config: TestConfig):
+    _prompt_session = config.prompt.execute()
+    _response = config.model.execute(_prompt_session)
+    assert isinstance(_response, ModelResponse)
+    assert isinstance(_response.data, str)
+
+
+def test_agent_execute(request, config: TestConfig):
+    _response = config.agent.execute()
+    assert isinstance(_response, AgentResponse)
+    assert isinstance(_response.data, str)
+
+
+@pytest.mark.asyncio
+async def test_async_execute(request, config: TestConfig):
+    _prompt_session = config.prompt.execute()
+    _response = await config.model.aexecute(_prompt_session)
+    assert isinstance(_response, ModelResponse)
+    assert isinstance(_response.data, str)
+
+
+@pytest.mark.asyncio
+async def test_async_agent_execute(request, config: TestConfig):
+    _response = await config.agent.aexecute()
+    assert isinstance(_response, AgentResponse)
+    assert isinstance(_response.data, str)
