@@ -14,7 +14,7 @@ class TestConfig():
     template_context: dict = {"compound": "Glucose", "description": "a sugar"}
     prompt_output: str = "Glucose is a sugar. What is Glucose?"
     audio_file: str = os.path.join(os.path.dirname(
-        __file__), 'assets/test_prompt_chain_multimodal.wav')
+        __file__), 'assets/audio_en.wav')
 
 
 @pytest.fixture
@@ -69,7 +69,7 @@ def test_prompt_chain_chat(config: TestConfig):
     assert isinstance(_response.text_prompt({}), str)
 
 
-def test_prompt_chain_multimodal(config: TestConfig):
+def audio_en(config: TestConfig):
     text_prompt = Prompt(template=config.template, pointer='template')
     audio_prompt = Prompt(file=config.audio_file)
     prompt_chain = PromptChain(prompts=[text_prompt, audio_prompt])
