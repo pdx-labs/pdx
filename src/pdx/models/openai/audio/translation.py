@@ -8,13 +8,13 @@ from pdx.models.metadata import ModelResponse, ResponseMetadata
 from pdx.models.utils.image import format_response
 
 
-class AudioTranscriptionModel(Model):
+class AudioTranslationModel(Model):
     def __init__(self,
                  api_key: str,
                  **kwargs,
                  ):
 
-        self._api_url = "v1/audio/transcriptions"
+        self._api_url = "v1/audio/translations"
 
         self._provider = "openai"
         self._client = OpenAIClient(api_key)
@@ -24,8 +24,6 @@ class AudioTranscriptionModel(Model):
         self._response_format = kwargs.get('response_format', 'text')
         # temperature Optional[float] = 0.0 options: 0.0 - 1.0
         self._temperature = kwargs.get('temperature', 0.0)
-        # language  Optional[str] = 'en' options: ISO-639-1 https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
-        self._language = kwargs.get('language', 'en')
 
         self._retries = kwargs.get('retries', 2)
 
@@ -33,7 +31,6 @@ class AudioTranscriptionModel(Model):
         request_params = {
             "model": self._model,
             "temperature": self._temperature,
-            "language": self._language,
             "response_format": self._response_format,
         }
         _files: list = prompt.audio_prompt()
@@ -59,8 +56,8 @@ class AudioTranscriptionModel(Model):
 
         response_metadata = ResponseMetadata(
             model=request_params['model'],
-            stop='transcribe_completed',
-            stop_reason='transcribe_completed',
+            stop='translate_completed',
+            stop_reason='translate_completed',
             latency=request_time)
 
         _data_type = f'text_string'

@@ -7,13 +7,13 @@ from pdx.models.metadata import ModelResponse, ResponseMetadata
 from pdx.models.utils.image import format_response
 
 
-class ImageGenerationModel(Model):
+class ImageVariationModel(Model):
     def __init__(self,
                  api_key: str,
                  **kwargs,
                  ):
 
-        self._api_url = "v1/images/generations"
+        self._api_url = "v1/images/variations"
 
         self._provider = "openai"
         self._client = OpenAIClient(api_key)
@@ -31,19 +31,21 @@ class ImageGenerationModel(Model):
             "size": self._size,
             "response_format": self._response_format,
         }
-        _prompt = prompt.text_prompt({})
-        # The maximum length is 1000 characters.
-        # TODO: Add a check for this.
-        request_params['prompt'] = _prompt
+        _files: list = prompt.image_prompt()
+        if len(_files) > 1:
+            logger.echo('Only one image prompt supported at the moment.')
+        request_params['files'] = {
+            "image": (_files[0][0], _files[0][1], "image/png")}
 
         return request_params
 
     def _postprocess(self, response: dict, request_params: dict, request_time: float) -> ModelResponse:
         _prompt = request_params.pop('prompt', None)
+        _files = request_params.pop('files', None)
         _r = json.loads(response)
 
         response_metadata = ResponseMetadata(
-            model='dall-e-generations',
+            model='dall-e-variations',
             api_log_id=f"{_r['created']}",
             stop='generation_completed',
             stop_reason='generation_completed',
