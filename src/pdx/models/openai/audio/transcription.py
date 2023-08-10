@@ -36,9 +36,12 @@ class AudioTranscriptionModel(Model):
             "language": self._language,
             "response_format": self._response_format,
         }
-        _file: tuple = prompt.audio_prompt()
+        _files: list = prompt.audio_prompt()
+        if len(_files) > 1:
+            logger.echo('Only one audio prompt supported at the moment.')
         _prompt = prompt.text_prompt({})
-        request_params['files'] = {"file": _file}
+        request_params['files'] = {
+            "file": (_files[0][0], _files[0][1], "application/octet-stream")}
         request_params['prompt'] = _prompt
 
         return request_params

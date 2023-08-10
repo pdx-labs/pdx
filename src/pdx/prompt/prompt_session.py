@@ -52,13 +52,26 @@ class PromptSession:
                 f"PromptSessionItem content_type {session_item.content_type} not supported.")
 
     def audio_prompt(self):
-        if len(self.multimodal_items['audio']) > 1:
-            raise ValueError(
-                'Only one audio prompt supported at the moment. Raise an issue if you want this to be raised.')
         if len(self.multimodal_items['audio']) == 0:
             raise ValueError('No audio prompt found in PromptSession.')
-
-        return (os.path.basename(self.multimodal_items['audio'][0].metadata.get('file_path', 'audio.mp3')), self.multimodal_items['audio'][0].content, "application/octet-stream")
+        _prompt_list = []
+        for _item in self.multimodal_items['audio']:
+            _file_name = os.path.basename(
+                _item.metadata.get('file_path', 'audio.mp3'))
+            _content = _item.content
+            _prompt_list.append((_file_name, _content))
+        return _prompt_list
+    
+    def image_prompt(self):
+        if len(self.multimodal_items['image']) == 0:
+            raise ValueError('No image prompt found in PromptSession.')
+        _prompt_list = []
+        for _item in self.multimodal_items['image']:
+            _file_name = os.path.basename(
+                _item.metadata.get('file_path', 'image.png'))
+            _content = _item.content
+            _prompt_list.append((_file_name, _content))
+        return _prompt_list
 
     def text_prompt(self, role_constants: dict = {
         'user': '\n\nUSER',
