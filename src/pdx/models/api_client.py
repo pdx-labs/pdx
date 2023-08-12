@@ -86,7 +86,8 @@ class APIClient:
             files=request.files,
         )
 
-        content = _response.content.decode("utf-8")
+        # content = _response.content.decode("utf-8")
+        content = _response.content
         self._response_middleware(_response, content)
         return content
         # TODO: content is what is returned
@@ -123,7 +124,8 @@ class APIClient:
                 timeout=request.timeout,
                 proxy=self.proxy_url,
             ) as _response:
-                content = await _response.text()
+                # content = await _response.text()
+                content = await _response.read()
                 self._response_middleware(_response, content)
                 return content
                 # TODO: content is what is returned

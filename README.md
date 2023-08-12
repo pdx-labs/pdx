@@ -54,3 +54,5 @@ Check our the demos in the [demos repository](https://github.com/pdx-labs/demos)
 
 -   OpenAI
 -   Anthropic
+-   Cohere
+-   Eleven Labs
