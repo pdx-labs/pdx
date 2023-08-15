@@ -1,5 +1,6 @@
 from time import time
 from pdx.logger import logger
+from pdx.settings import process
 from pdx.prompt.prompt_session import PromptSession
 from pdx.models.api_client import APIClient
 from pdx.models.metadata import ModelResponse, ResponseMetadata, ModelTokenUsage
@@ -78,6 +79,8 @@ class Model:
                 request_time = time() - start_time
                 return self._postprocess(_r, request_params, request_time)
             except Exception as e:
+                if not process._release:
+                    raise e
                 logger.verbose(
                     f"{self._provider} {self._model} model failed to run.\nReason: {e}")
                 _retry_error_log.append(e)
@@ -103,6 +106,8 @@ class Model:
                 request_time = time() - start_time
                 return self._postprocess(_r, request_params, request_time)
             except Exception as e:
+                if not process._release:
+                    raise e
                 logger.verbose(
                     f"{self._provider} {self._model} model failed to run.\nReason: {e}")
                 _retry_error_log.append(e)

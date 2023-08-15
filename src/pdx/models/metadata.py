@@ -16,6 +16,7 @@ class ResponseMetadata(BaseModel):
     warnings: Optional[Any] = Field(default=None)
     token_usage: Optional[ModelTokenUsage] = Field(default=ModelTokenUsage())
     latency: Optional[float] = Field(default=None)
+    other: Optional[Any] = Field(default=None)
 
 
 class ModelResponse(BaseModel):
