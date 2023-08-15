@@ -5,7 +5,14 @@ from pdx.prompt.prompt_session import PromptSession, PromptSessionItem
 
 
 class Prompt:
-    def __init__(self, content: str = None, template: str = None, template_path: str = None, role: str = 'template', pointer: str = 'prompt', file: str = None):
+    def __init__(self,
+                 content: str = None,
+                 template: str = None,
+                 template_path: str = None,
+                 role: str = 'template',
+                 pointer: str = 'prompt',
+                 file: str = None,
+                 metadata: dict = {}):
         if file == None:
             if content != None and template != None:
                 raise Exception(
@@ -55,16 +62,19 @@ class Prompt:
             self.pointer = pointer
             self.prompt_type = 'text'
 
+        assert isinstance(
+            metadata, dict), 'prompt::metadata must be a dictionary.'
+        self._metadata = metadata
+
     def execute(self, values: dict = {}, _output_item=False, prompt_session: PromptSession = None) -> Union[PromptSession, PromptSessionItem]:
+        _metadata = self._metadata
         if self.prompt_type in ['image', 'audio']:
             _prompt_content = self.file_content
-            _metadata = {'file_path': self.file_path}
+            _metadata['file_path'] = self.file_path
         elif isinstance(self._prompt, str):
             _prompt_content = self._prompt
-            _metadata = None
         elif isinstance(self._prompt, PromptTemplate):
             _prompt_content = self._prompt.execute(values)
-            _metadata = None
         else:
             raise Exception('Prompt not initialized properly.')
 

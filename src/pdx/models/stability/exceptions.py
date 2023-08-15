@@ -1,12 +1,13 @@
 from pdx.exceptions import ModelError, PromptError
+from pdx.logger import logger
 import json
 
 
-def handle_elevenlabs_prompt_validation(prompt: str) -> None:
+def handle_stability_prompt_validation(prompt: str) -> None:
     pass
 
 
-def handle_elevenlabs_request_error(status_code: int, content: str) -> None:
+def handle_stability_request_error(status_code: int, content: str) -> None:
     try:
         formatted_content = json.loads(content)
     except json.decoder.JSONDecodeError:
@@ -14,9 +15,13 @@ def handle_elevenlabs_request_error(status_code: int, content: str) -> None:
 
     status_code_messages = {
         400: "Bad request: there was an issue with the format or content of your request.",
-        401: "Unauthorized or Rate limit exceeded.",
-        500: "An unexpected error has occurred internal to Eleven Labs' systems.",
+        401: "Unauthorized: missing auth header or rate limit exceeded.",
+        403: "Unauthorized: you do not have permission for this request.",
+        404: "Enginge ID not found.",
+        500: "An unexpected server error occurred, please try again later."
     }
+
+    logger.verbose(f"Stability API Error: {status_code} - {formatted_content}")
 
     if status_code in status_code_messages:
         _message = status_code_messages[status_code]
@@ -27,4 +32,4 @@ def handle_elevenlabs_request_error(status_code: int, content: str) -> None:
     else:
         _message = "An unknown error has occurred."
 
-    raise ModelError(status_code, _message, "ELEVENLABS-API-ERROR")
+    raise ModelError(status_code, _message, "STABILITY-API-ERROR")

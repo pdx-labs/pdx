@@ -61,7 +61,7 @@ class PromptSession:
             _content = _item.content
             _prompt_list.append((_file_name, _content))
         return _prompt_list
-    
+
     def image_prompt(self):
         if len(self.multimodal_items['image']) == 0:
             raise ValueError('No image prompt found in PromptSession.')
@@ -93,13 +93,16 @@ class PromptSession:
 
         return _prompt
 
-    def chat_prompt(self):
+    def chat_prompt(self, with_metadata=False):
         _prompt_dict_list = []
         for item in self.items:
-            _prompt_dict_list.append({
+            _prompt_item = {
                 'role': item.role,
                 'content': item.content
-            })
+            }
+            if with_metadata:
+                _prompt_item.update(item.metadata)
+            _prompt_dict_list.append(_prompt_item)
         return _prompt_dict_list
 
     def export(self):
