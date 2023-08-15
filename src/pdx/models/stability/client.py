@@ -33,7 +33,6 @@ class StabilityClient(APIClient):
         method = method.lower()
         abs_url = urllib.parse.urljoin(self.api_url, path)
         final_headers: dict[str, str] = {
-            "Content-Type": "application/json",
             "Accept": "application/json",
             "Authorization": f"Bearer {self.api_key}",
             **(headers or {}),
@@ -42,12 +41,16 @@ class StabilityClient(APIClient):
         data = None
         if params:
             if method in {"post"}:
-                data = json.dumps(params).encode()
+                if files is not None:
+                    data = params
+                else:
+                    data = json.dumps(params).encode()
+                    final_headers["Content-Type"] = "application/json"
             else:
                 raise ValueError(f"Unrecognized method: {method}")
 
         # TODO: Add support for stream, tell requests if to expect a stream
-        stream = params.get("stream", None)        
+        stream = params.get("stream", None)
         return APIRequest(
             method,
             abs_url,

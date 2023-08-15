@@ -15,7 +15,10 @@ def handle_stability_request_error(status_code: int, content: str) -> None:
 
     status_code_messages = {
         400: "Bad request: there was an issue with the format or content of your request.",
-        401: "Unauthorized or Rate limit exceeded.",
+        401: "Unauthorized: missing auth header or rate limit exceeded.",
+        403: "Unauthorized: you do not have permission for this request.",
+        404: "Enginge ID not found.",
+        500: "An unexpected server error occurred, please try again later."
     }
 
     logger.verbose(f"Stability API Error: {status_code} - {formatted_content}")

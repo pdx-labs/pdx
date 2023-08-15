@@ -5,9 +5,10 @@ from pdx.models.model import Model
 from pdx.prompt.prompt_session import PromptSession
 from pdx.models.stability.client import StabilityClient
 from pdx.models.metadata import ModelResponse, ResponseMetadata
+from pdx.models.utils.image import format_response
 
 
-class ImageGenerationModel(Model):
+class ImageVariationModel(Model):
     def __init__(self,
                  api_key: str,
                  **kwargs,
@@ -16,15 +17,19 @@ class ImageGenerationModel(Model):
         self._provider = "stability"
         self._client = StabilityClient(api_key)
         self._engine_id = kwargs.get(
-            'engine_id', 'stable-diffusion-xl-1024-v1-0')
+            'engine_id', 'stable-diffusion-v1-5')
         self._model = kwargs.get(
-            'engine_id', 'stable-diffusion-xl-1024-v1-0')
-        self._api_url = f"v1/generation/{self._engine_id}/text-to-image"
+            'engine_id', 'stable-diffusion-v1-5')
+        self._api_url = f"v1/generation/{self._engine_id}/image-to-image"
 
-        # DiffuseImageHeight int multiple of 64 >= 128
-        self._height = kwargs.get('height', 1024)
-        # DiffuseImageWidth int multiple of 64 >= 128
-        self._width = kwargs.get('width', 1024)
+        # STEP_SCHEDULE, IMAGE_STRENGTH
+        self._init_image_mode = kwargs.get('init_image_mode', 'IMAGE_STRENGTH')
+        # image_strength float [ 0.0, 1.0 ]
+        self._image_strength = kwargs.get('init_image_strength', 0.35)
+        # step_schedule_start float [ 0.0, 1.0 ] also 1 - image_strength
+        self._step_schedule_start = kwargs.get('step_schedule_start', 0.65)
+        # step_schedule_end float [ 0.0, 1.0 ] to skip the end portion of the diffusion step
+        self._step_schedule_end = kwargs.get('step_schedule_end', None)
         # cfg_scale int  [0, 35]
         self._cfg_scale = kwargs.get('cfg_scale', 7)
         # clip_guidance_preset	str [FAST_BLUE FAST_GREEN NONE SIMPLE SLOW SLOWER SLOWEST]
@@ -46,8 +51,7 @@ class ImageGenerationModel(Model):
 
     def _preprocess(self, prompt: PromptSession) -> dict:
         request_params = {
-            'height': self._height,
-            'width': self._width,
+            'init_image_mode': self._init_image_mode,
             'cfg_scale': self._cfg_scale,
             'clip_guidance_preset': self._clip_guidance_preset,
             'samples': self._samples,
@@ -59,20 +63,37 @@ class ImageGenerationModel(Model):
         if self._style_preset is not None:
             request_params['style_preset'] = self._style_preset
 
-        _prompts = prompt.chat_prompt(with_metadata=True)
-        _text_prompts = []
-        for _p in _prompts:
-            _text_prompts.append({
-                'text': _p['content'],
-                'weight': _p.get('weight', 1)
-            })
+        if self._init_image_mode == 'IMAGE_STRENGTH':
+            request_params['image_strength'] = self._image_strength
+        elif self._init_image_mode == 'STEP_SCHEDULE':
+            request_params['step_schedule_start'] = self._step_schedule_start
+            if self._step_schedule_end is not None:
+                request_params['step_schedule_end'] = self._step_schedule_end
+        else:
+            pass
 
-        request_params['text_prompts'] = _text_prompts
+        _prompts = prompt.chat_prompt(with_metadata=True)
+        for idx, _p in enumerate(_prompts):
+            request_params[f'text_prompts[{idx}][text]'] = _p['content']
+            request_params[f'text_prompts[{idx}][weight]'] = _p.get(
+                'weight', 1)
+
+        _images: list = prompt.image_prompt()
+        if len(_images) > 1:
+            logger.echo('Only one image prompt supported at the moment.')
+        request_params['files'] = {
+            "init_image": (_images[0][0], _images[0][1])}
 
         return request_params
 
     def _postprocess(self, response: dict, request_params: dict, request_time: float) -> ModelResponse:
-        # _prompt = request_params.pop('text_prompts', None)
+        _prompt_keys = [x for x in request_params.keys()
+                        if 'text_prompts' in x]
+        print(_prompt_keys)
+        for _k in _prompt_keys:
+            _ = request_params.pop(_k, None)
+        request_params.pop('text_prompts', None)
+        _files = request_params.pop('files', None)
         _r: dict = json.loads(response)
 
         _seed = None
