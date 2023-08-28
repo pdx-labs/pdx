@@ -93,7 +93,8 @@ class ReplicateClient(APIClient):
 
         _r_json = _r.json()
         get_prediction_url = _r_json["urls"]["get"]
-        _rp = poll_status(api_key=self.api_key, get_url=get_prediction_url, poll_interval=self.poll_interval)
+        _rp = poll_status(
+            api_key=self.api_key, get_url=get_prediction_url, poll_interval=self.poll_interval)
         content = _rp.content
         self._response_middleware(_rp, content)
         return content
@@ -129,7 +130,9 @@ class ReplicateClient(APIClient):
             ) as _r:
                 _r_json = await _r.json()
                 get_prediction_url = _r_json["urls"]["get"]
-                _rp = await apoll_status(api_key=self.api_key, get_url=get_prediction_url, poll_interval=self.poll_interval)
-                content = await _rp.read()
-                self._response_middleware(_rp, content)
-                return content
+                _rp_content = await apoll_status(
+                    api_key=self.api_key,
+                    get_url=get_prediction_url,
+                    poll_interval=self.poll_interval,
+                    _middleware=self._response_middleware)
+                return _rp_content
